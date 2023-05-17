@@ -100,7 +100,7 @@ while True:
                 print('\tGénero: ', datos[i][2])
                 print('\tAño de Publicación: ', datos[i][3])
                 print('\tFecha de Adquisición: ', datos[i][5])
-                imprimir_linea() 
+                print(separador) 
                 break            
           elif op_busqueda == 3:
             break
