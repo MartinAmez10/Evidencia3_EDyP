@@ -172,9 +172,9 @@ while True:
               hoja["B2"].value = datos[identificador][0]
               hoja["C2"].value = datos[identificador][1]
               hoja["D2"].value = datos[identificador][2]
-              hoja["F2"].value = datos[identificador][3]
-              hoja["G2"].value = datos[identificador][4]
-              hoja["H2"].value = datos[identificador][5]
+              hoja["E2"].value = datos[identificador][3]
+              hoja["F2"].value = datos[identificador][4]
+              hoja["G2"].value = datos[identificador][5]
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -234,9 +234,9 @@ while True:
               hoja["B2"].value = datos[identificador][0]
               hoja["C2"].value = datos[identificador][1]
               hoja["D2"].value = datos[identificador][2]
-              hoja["F2"].value = datos[identificador][3]
-              hoja["G2"].value = datos[identificador][4]
-              hoja["H2"].value = datos[identificador][5]
+              hoja["E2"].value = datos[identificador][3]
+              hoja["F2"].value = datos[identificador][4]
+              hoja["G2"].value = datos[identificador][5]
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -297,9 +297,9 @@ while True:
               hoja["B2"].value = datos[identificador][0]
               hoja["C2"].value = datos[identificador][1]
               hoja["D2"].value = datos[identificador][2]
-              hoja["F2"].value = datos[identificador][3]
-              hoja["G2"].value = datos[identificador][4]
-              hoja["H2"].value = datos[identificador][5]
+              hoja["E2"].value = datos[identificador][3]
+              hoja["F2"].value = datos[identificador][4]
+              hoja["G2"].value = datos[identificador][5]
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -352,9 +352,9 @@ while True:
               hoja["B2"].value = datos[identificador][0]
               hoja["C2"].value = datos[identificador][1]
               hoja["D2"].value = datos[identificador][2]
-              hoja["F2"].value = datos[identificador][3]
-              hoja["G2"].value = datos[identificador][4]
-              hoja["H2"].value = datos[identificador][5]
+              hoja["E2"].value = datos[identificador][3]
+              hoja["F2"].value = datos[identificador][4]
+              hoja["G2"].value = datos[identificador][5]
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
