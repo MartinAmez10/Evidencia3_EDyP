@@ -2,8 +2,7 @@ import csv
 import sys
 #import openpyxl
 #No permite utilizar ese modulo
-def imprimir_linea():
-  print("*"*100)
+separador = "*"*100
 
 datos_grabar = dict()
 datos_leer = dict()
@@ -86,7 +85,7 @@ while True:
                 print('\tAño de Publicación: ', datos[i][3])
                 print('\tISBN: ', datos[i][4])
                 print('\tFecha de Adquisición: ', datos[i][5])
-                imprimir_linea()
+                print(separador)
                 break
           elif op_busqueda == 2:
             # Muestra el libro (POR ISBN)
@@ -306,10 +305,10 @@ while True:
             # Catálogo completo
             print("DATOS GUARDADOS:")
             print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            imprimir_linea()
+            print(separador)
             for i in datos: 
               print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-            imprimir_linea()
+            print(separador)
 
             # exportacion a formato CSV o a MsExcel
             print("Desea exportar los datos a algun formato de los siguientes?")
