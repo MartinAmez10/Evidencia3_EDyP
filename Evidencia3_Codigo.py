@@ -2,6 +2,8 @@ import csv
 import sys
 #import openpyxl
 #No permite utilizar ese modulo
+import sqlite3
+
 separador = "*"*100
 
 datos_grabar = dict()
@@ -33,7 +35,9 @@ while True:
   print("Hola! selecciona una opcion que quieras realizar (escribe el numero):")
   print("[1]- Registrar nuevo ejemplar")
   print("[2]- Consultas y Reportes")
-  print("[3]- Salir")
+  print("[3]- Agregar autor")
+  print("[4]- Agregar Genero")
+  print("[5]- Salir")
   op_main = int(input())
   
   if op_main == 1:
@@ -364,6 +368,10 @@ while True:
         break
 
   elif op_main == 3:
+    print()
+  elif op_main == 4:
+    print()
+  elif op_main == 5:
     # Sale del programa
     break
 
