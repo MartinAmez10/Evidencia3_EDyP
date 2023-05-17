@@ -1,7 +1,6 @@
 import csv
 import sys
 import openpyxl
-#No permite utilizar ese modulo
 import sqlite3
 # Testing
 separador = "*"*100
