@@ -1,6 +1,6 @@
 import csv
 import sys
-#import openpyxl
+import openpyxl
 #No permite utilizar ese modulo
 import sqlite3
 # Testing
@@ -156,27 +156,27 @@ while True:
           
             # Exportación a MsExcel
             if op_exportar == 2:
-              #libro = openpyxl.Workbook()
-              #hoja = libro["Sheet"]
-              #hoja.title = "primera"
-              #hoja["A1"].value = "Identificador"
-              #hoja["B1"].value = "Titulo"
-              #hoja["C1"].value = "Autor"
-              #hoja["D1"].value = "Genero"
-              #hoja["E1"].value = "Año de publicacion"
-              #hoja["F1"].value = "ISBN"
-              #hoja["G1"].value = "Fecha adquisicion"
+              libro = openpyxl.Workbook()
+              hoja = libro["Sheet"]
+              hoja.title = "primera"
+              hoja["A1"].value = "Identificador"
+              hoja["B1"].value = "Titulo"
+              hoja["C1"].value = "Autor"
+              hoja["D1"].value = "Genero"
+              hoja["E1"].value = "Año de publicacion"
+              hoja["F1"].value = "ISBN"
+              hoja["G1"].value = "Fecha adquisicion"
 
-              #fila = 0
-              #hoja["A2"].value = fila + 1
-              #hoja["B2"].value = datos[identificador][0]
-              #hoja["C2"].value = datos[identificador][1]
-              #hoja["D2"].value = datos[identificador][2]
-              #hoja["F2"].value = datos[identificador][3]
-              #hoja["G2"].value = datos[identificador][4]
-              #hoja["H2"].value = datos[identificador][5]
+              fila = 0
+              hoja["A2"].value = fila + 1
+              hoja["B2"].value = datos[identificador][0]
+              hoja["C2"].value = datos[identificador][1]
+              hoja["D2"].value = datos[identificador][2]
+              hoja["F2"].value = datos[identificador][3]
+              hoja["G2"].value = datos[identificador][4]
+              hoja["H2"].value = datos[identificador][5]
 
-              #libro.save("reporte_libros.xlsx")
+              libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
               break
           elif op_reporte == 2:
@@ -218,27 +218,27 @@ while True:
           
             # Exportación a MsExcel
             if op_exportar == 2:
-              #libro = openpyxl.Workbook()
-              #hoja = libro["Sheet"]
-              #hoja.title = "primera"
-              #hoja["A1"].value = "Identificador"
-              #hoja["B1"].value = "Titulo"
-              #hoja["C1"].value = "Autor"
-              #hoja["D1"].value = "Genero"
-              #hoja["E1"].value = "Año de publicacion"
-              #hoja["F1"].value = "ISBN"
-              #hoja["G1"].value = "Fecha adquisicion"
+              libro = openpyxl.Workbook()
+              hoja = libro["Sheet"]
+              hoja.title = "primera"
+              hoja["A1"].value = "Identificador"
+              hoja["B1"].value = "Titulo"
+              hoja["C1"].value = "Autor"
+              hoja["D1"].value = "Genero"
+              hoja["E1"].value = "Año de publicacion"
+              hoja["F1"].value = "ISBN"
+              hoja["G1"].value = "Fecha adquisicion"
 
-              #fila = 0
-              #hoja["A2"].value = fila + 1
-              #hoja["B2"].value = datos[identificador][0]
-              #hoja["C2"].value = datos[identificador][1]
-              #hoja["D2"].value = datos[identificador][2]
-              #hoja["F2"].value = datos[identificador][3]
-              #hoja["G2"].value = datos[identificador][4]
-              #hoja["H2"].value = datos[identificador][5]
+              fila = 0
+              hoja["A2"].value = fila + 1
+              hoja["B2"].value = datos[identificador][0]
+              hoja["C2"].value = datos[identificador][1]
+              hoja["D2"].value = datos[identificador][2]
+              hoja["F2"].value = datos[identificador][3]
+              hoja["G2"].value = datos[identificador][4]
+              hoja["H2"].value = datos[identificador][5]
 
-              #libro.save("reporte_libros.xlsx")
+              libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
               break
 
@@ -281,27 +281,27 @@ while True:
           
             # Exportación a MsExcel
             if op_exportar == 2:
-              #libro = openpyxl.Workbook()
-              #hoja = libro["Sheet"]
-              #hoja.title = "primera"
-              #hoja["A1"].value = "Identificador"
-              #hoja["B1"].value = "Titulo"
-              #hoja["C1"].value = "Autor"
-              #hoja["D1"].value = "Genero"
-              #hoja["E1"].value = "Año de publicacion"
-              #hoja["F1"].value = "ISBN"
-              #hoja["G1"].value = "Fecha adquisicion"
+              libro = openpyxl.Workbook()
+              hoja = libro["Sheet"]
+              hoja.title = "primera"
+              hoja["A1"].value = "Identificador"
+              hoja["B1"].value = "Titulo"
+              hoja["C1"].value = "Autor"
+              hoja["D1"].value = "Genero"
+              hoja["E1"].value = "Año de publicacion"
+              hoja["F1"].value = "ISBN"
+              hoja["G1"].value = "Fecha adquisicion"
 
-              #fila = 0
-              #hoja["A2"].value = fila + 1
-              #hoja["B2"].value = datos[identificador][0]
-              #hoja["C2"].value = datos[identificador][1]
-              #hoja["D2"].value = datos[identificador][2]
-              #hoja["F2"].value = datos[identificador][3]
-              #hoja["G2"].value = datos[identificador][4]
-              #hoja["H2"].value = datos[identificador][5]
+              fila = 0
+              hoja["A2"].value = fila + 1
+              hoja["B2"].value = datos[identificador][0]
+              hoja["C2"].value = datos[identificador][1]
+              hoja["D2"].value = datos[identificador][2]
+              hoja["F2"].value = datos[identificador][3]
+              hoja["G2"].value = datos[identificador][4]
+              hoja["H2"].value = datos[identificador][5]
 
-              #libro.save("reporte_libros.xlsx")
+              libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
               break
 
@@ -336,27 +336,27 @@ while True:
           
             # exportacion a MsExcel
             if op_exportar == 2:
-              #libro = openpyxl.Workbook()
-              #hoja = libro["Sheet"]
-              #hoja.title = "primera"
-              #hoja["A1"].value = "Identificador"
-              #hoja["B1"].value = "Titulo"
-              #hoja["C1"].value = "Autor"
-              #hoja["D1"].value = "Genero"
-              #hoja["E1"].value = "Año de publicacion"
-              #hoja["F1"].value = "ISBN"
-              #hoja["G1"].value = "Fecha adquisicion"
+              libro = openpyxl.Workbook()
+              hoja = libro["Sheet"]
+              hoja.title = "primera"
+              hoja["A1"].value = "Identificador"
+              hoja["B1"].value = "Titulo"
+              hoja["C1"].value = "Autor"
+              hoja["D1"].value = "Genero"
+              hoja["E1"].value = "Año de publicacion"
+              hoja["F1"].value = "ISBN"
+              hoja["G1"].value = "Fecha adquisicion"
 
-              #fila = 0
-              #hoja["A2"].value = fila + 1
-              #hoja["B2"].value = datos[identificador][0]
-              #hoja["C2"].value = datos[identificador][1]
-              #hoja["D2"].value = datos[identificador][2]
-              #hoja["F2"].value = datos[identificador][3]
-              #hoja["G2"].value = datos[identificador][4]
-              #hoja["H2"].value = datos[identificador][5]
+              fila = 0
+              hoja["A2"].value = fila + 1
+              hoja["B2"].value = datos[identificador][0]
+              hoja["C2"].value = datos[identificador][1]
+              hoja["D2"].value = datos[identificador][2]
+              hoja["F2"].value = datos[identificador][3]
+              hoja["G2"].value = datos[identificador][4]
+              hoja["H2"].value = datos[identificador][5]
 
-              #libro.save("reporte_libros.xlsx")
+              libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
               break
           elif op_reporte == 5:
