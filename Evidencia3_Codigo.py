@@ -174,14 +174,16 @@ while True:
               hoja["F1"].value = "ISBN"
               hoja["G1"].value = "Fecha adquisicion"
 
-              fila = 0
-              hoja["A2"].value = fila + 1
-              hoja["B2"].value = datos[identificador][0]
-              hoja["C2"].value = datos[identificador][1]
-              hoja["D2"].value = datos[identificador][2]
-              hoja["E2"].value = datos[identificador][3]
-              hoja["F2"].value = datos[identificador][4]
-              hoja["G2"].value = datos[identificador][5]
+              fila = 2
+              for identificador, dato in datos.items():
+                hoja.cell(row=fila, column=1).value = identificador
+                hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                fila += 1
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -236,14 +238,16 @@ while True:
               hoja["F1"].value = "ISBN"
               hoja["G1"].value = "Fecha adquisicion"
 
-              fila = 0
-              hoja["A2"].value = fila + 1
-              hoja["B2"].value = datos[identificador][0]
-              hoja["C2"].value = datos[identificador][1]
-              hoja["D2"].value = datos[identificador][2]
-              hoja["E2"].value = datos[identificador][3]
-              hoja["F2"].value = datos[identificador][4]
-              hoja["G2"].value = datos[identificador][5]
+              fila = 2
+              for identificador, dato in datos.items():
+                hoja.cell(row=fila, column=1).value = identificador
+                hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                fila += 1
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -299,14 +303,16 @@ while True:
               hoja["F1"].value = "ISBN"
               hoja["G1"].value = "Fecha adquisicion"
 
-              fila = 0
-              hoja["A2"].value = fila + 1
-              hoja["B2"].value = datos[identificador][0]
-              hoja["C2"].value = datos[identificador][1]
-              hoja["D2"].value = datos[identificador][2]
-              hoja["E2"].value = datos[identificador][3]
-              hoja["F2"].value = datos[identificador][4]
-              hoja["G2"].value = datos[identificador][5]
+              fila = 2
+              for identificador, dato in datos.items():
+                hoja.cell(row=fila, column=1).value = identificador
+                hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                fila += 1
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
@@ -354,14 +360,16 @@ while True:
               hoja["F1"].value = "ISBN"
               hoja["G1"].value = "Fecha adquisicion"
 
-              fila = 0
-              hoja["A2"].value = fila + 1
-              hoja["B2"].value = datos[identificador][0]
-              hoja["C2"].value = datos[identificador][1]
-              hoja["D2"].value = datos[identificador][2]
-              hoja["E2"].value = datos[identificador][3]
-              hoja["F2"].value = datos[identificador][4]
-              hoja["G2"].value = datos[identificador][5]
+              fila = 2
+              for identificador, dato in datos.items():
+                hoja.cell(row=fila, column=1).value = identificador
+                hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                fila += 1
 
               libro.save("reporte_libros.xlsx")
               print("Se exporto de manera correcta")
