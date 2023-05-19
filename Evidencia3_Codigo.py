@@ -24,9 +24,10 @@ if not os.path.exists("biblioteca.db"):
   # Aquí creamos el almacén, nos conectamos a la base de datos y creamos una tabla ya que no existen     
   with sqlite3.connect("biblioteca.db") as conn:
     bi_cursor = conn.cursor()
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen), año_publicado TEXT NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido TEXT NOT NULL);")
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS GENERO (Id_gen INT PRIMARY KEY NOT NULL, nomGen VARCHAR2(20) NOT NULL);")
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS AUTOR (Id_autor INT PRIMARY KEY NOT NULL, apAutor VARCHAR2(32) NOT NULL, nomAutor VARCHAR2(32) NOT NULL)")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS GENERO (Id_gen INTEGER PRIMARY KEY, nomGen TEXT NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS AUTOR (Id_autor INTEGER PRIMARY KEY, apAutor TEXT NOT NULL, nomAutor TEXT NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, AUTOR INTEGER NOT NULL, GENERO INTEGER NOT NULL, año_publicado TEXT NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido TEXT NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen));")
+    
     print('AVISO:\t¡Almacén generado con éxito!\n')
 else:
   # En caso de que SI exista un almacén de datos llamado así, simplemente hacemos una conexión a la base de datos
@@ -47,8 +48,39 @@ while True:
     while True:
       identificador = max(datos, default=0)+1
       titulo = input("Dame el nombre del libro: \n").upper()
-      autor = input(f"Dame el autor de {titulo}: \n").upper()
+      autor_nombre = input(f"Dame unicamente el NOMBRE del autor de {titulo}: \n").upper()
+      autor_apellidos = input(f"Dame unicamente los APELLIDOS del autor de {titulo}: \n").upper()
+      autor = (autor_nombre + ' ' + autor_apellidos)
+      valorEvaluar_autor = {"nomAutor":autor_nombre}
+      bi_cursor.execute("SELECT Id_autor FROM AUTOR WHERE nomAutor = :nomAutor", valorEvaluar_autor)
+      log_evaluarAutor = bi_cursor.fetchall()
+      #valores_ameter_autor = (autor_nombre, autor_apellidos)
+      if log_evaluarAutor:
+        for Id_autor in log_evaluarAutor:
+          autor_id_evaluado = Id_autor
+      else:
+        bi_cursor.execute("SELECT Id_autor FROM AUTOR")
+        ultima_id_autor = bi_cursor.lastrowid + 1
+        valores_ameter_autor = (ultima_id_autor, autor_apellidos, autor_nombre)
+        bi_cursor.execute("INSERT INTO AUTOR VALUES(?,?,?)", valores_ameter_autor)
+        autor_id_evaluado = ultima_id_autor
+
       genero = input(f"Cual es el genero de {titulo}: \n").upper()
+
+      valorEvaluar_genero = {"nomGen":genero}
+      bi_cursor.execute("SELECT Id_gen FROM GENERO WHERE nomGen = :nomGen", valorEvaluar_genero)
+      log_evaluarGen = bi_cursor.fetchall()
+
+      if log_evaluarGen:
+        for Id_gen in log_evaluarGen:
+          genero_id_evaluado = Id_gen
+      else:
+        bi_cursor.execute("SELECT Id_gen FROM GENERO")
+        ultima_id_genero = bi_cursor.lastrowid + 1
+        valores_ameter_genero = (ultima_id_genero, genero)
+        bi_cursor.execute("INSERT INTO GENERO VALUES(?, ?)", valores_ameter_genero)
+        genero_id_evaluado = ultima_id_genero
+        
       año_publicacion = input(f"En que año se publico {titulo}: \n").upper()
       ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
       fecha_adquisicion = input(f"Cuando se adquirio {titulo} (En formato (YYYY/MM/DD): \n").upper()
@@ -56,9 +88,8 @@ while True:
       print("Datos cargados!")
 
       # Ingresamos estos datos en la base de datos generada
-      bi_cursor.execute(f"INSERT INTO BIBLIOTECA VALUES({identificador}, '{titulo}', \
-      {autor}, {genero}, )")
-
+      valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
+      bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
       op_registro = input("Deseas agregar mas?(En caso de no querer, presione Enter) \n")
       if op_registro.strip() == "":
         break
