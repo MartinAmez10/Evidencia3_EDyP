@@ -1,7 +1,10 @@
 import csv
 import sys
+import os
 import openpyxl
 import sqlite3
+from sqlite3 import Error
+
 # Testing
 separador = "*"*100
 
@@ -9,6 +12,8 @@ datos_grabar = dict()
 datos_leer = dict()
 
 datos = {}
+datos_autor = {}
+datos_genero = {}
 
 # Aquí reviso si existe un archivo llamado biblioteca.db que es donde aparece la base de datos
 if not os.path.exists("biblioteca.db"):
@@ -19,13 +24,14 @@ if not os.path.exists("biblioteca.db"):
   # Aquí creamos el almacén, nos conectamos a la base de datos y creamos una tabla ya que no existen     
   with sqlite3.connect("biblioteca.db") as conn:
     bi_cursor = conn.cursor()
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, autor VARCHAR2(32) NOT NULL, genero VARCHAR2(16) NOT NULL, año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen), año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS GENERO (Id_gen INT PRIMARY KEY NOT NULL, nomGen VARCHAR2(20) NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS AUTOR (Id_autor INT PRIMARY KEY NOT NULL, apAutor VARCHAR2(32) NOT NULL, nomAutor VARCHAR2(32) NOT NULL)")
     print('AVISO:\t¡Almacén generado con éxito!\n')
 else:
   # En caso de que SI exista un almacén de datos llamado así, simplemente hacemos una conexión a la base de datos
   with sqlite3.connect("biblioteca.db") as conn:
-    bi_cursor = conn.cursor()    
-
+    bi_cursor = conn.cursor()        
 
 while True:
   print("Hola! selecciona una opcion que quieras realizar (escribe el numero):")
@@ -37,7 +43,7 @@ while True:
   op_main = int(input())
   
   if op_main == 1:
-    # Registro de datos
+    # Registro de nuevo ejemplar
     while True:
       identificador = max(datos, default=0)+1
       titulo = input("Dame el nombre del libro: \n").upper()
@@ -48,7 +54,12 @@ while True:
       fecha_adquisicion = input(f"Cuando se adquirio {titulo}: \n").upper()
       datos[identificador] = [titulo,autor,genero,año_publicacion,ISBN,fecha_adquisicion]
       print("Datos cargados!")
-      op_registro = input("Deseas agregar mas?(si es no clickea enter) \n")
+
+      # Ingresamos estos datos en la base de datos generada
+      bi_cursor.execute(f"INSERT INTO BIBLIOTECA VALUES({identificador}, '{titulo}', \
+      {autor}, {genero}, )")
+
+      op_registro = input("Deseas agregar mas?(En caso de no querer, presione Enter) \n")
       if op_registro.strip() == "":
         break
 
@@ -364,9 +375,30 @@ while True:
         break
 
   elif op_main == 3:
-    print()
+    # Opción filtrada para: Registrar un Autor
+    print('Favor de ingresar los siguientes datos')
+    apellidos_autor = input('->\tApellidos: ')
+    nombres_autor = input('->\tNombre(s): ')
+
+    ide_autor = max(datos_autor, default=0)+1
+    datos_autor[ide_autor] = [apellidos_autor, nombres_autor]
+    print(datos_autor)
+    
+    # Lo añadimos a la tabla AUTOR en la base de datos
+    bi_cursor.execute(f"INSERT INTO AUTOR VALUES ({ide_autor}, '{apellidos_autor}', '{nombres_autor}');")
+
   elif op_main == 4:
-    print()
+    # Opción filtrada para: Registrar un Género
+    print('Favor de ingresar los siguientes datos')
+    nombre_genero = input('->\tNombre del género literario: ')
+
+    ide_genero = max(datos_genero, default=0)+1
+    datos_genero[ide_genero] = [nombre_genero]
+    print(datos_genero)
+    valores_genero = (ide_genero, nombre_genero)
+    # Lo añadimos a la tabla GENERO en la base de datos
+    bi_cursor.execute("INSERT INTO GENERO VALUES (?,?)", valores_genero)
+
   elif op_main == 5:
     # Sale del programa
     break
@@ -380,3 +412,4 @@ grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicaci
 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
 grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
 archivo.close()
+conn.close()
