@@ -10,25 +10,25 @@ datos_leer = dict()
 
 datos = {}
 
-try:
-
-  with open("logs_libros.csv","r", newline="") as archivo:
-      lector = csv.reader(archivo)
-      next(lector)
-      
-      for identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion in lector:
-          datos_leer[int(identificador)] = (titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion)
-except FileNotFoundError:
-    print("El archivo no se encontró, se procede a trabajar con un conjunto vacío\n\n")
-except Exception:
-    Excepcion = sys.exc_info()
-    print(f"Ocurrió un problema del tipo: {Excepcion[0]}")
-    print(f"Mensaje del error: {Excepcion[1]}")
+if not os.path.exists("biblioteca.db"):
+    print('No se ha encontrado una versión de datos previa. Se procede a crear un almacén de datos a continuación')
+    print('\tGenerando almacén de datos . . .')
+    
+    try:
+        with sqlite3.connect("biblioteca.db") as conn:
+            bi_cursor = conn.cursor()
+            bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, autor VARCHAR2(32) NOT NULL, genero VARCHAR2(16) NOT NULL, año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
+        #for identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion in lector:
+          #datos_leer[int(identificador)] = (titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion)
+            print('AVISO:\t¡Almacén generado con éxito!\n')
+    except Error as e:
+        print(f'¿Aquí? {e}')
+    except:
+        print(f'Error producido: {sys.exc_info()[0]}')
 else:
-  print(datos_leer) #Remover esta prueba de carga de datos
-  datos = datos_leer
-  #for identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion in lector:
-    #datos[identificador] = (titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion)
+    with sqlite3.connect("biblioteca.db") as conn:
+        bi_cursor = conn.cursor()    
+
 
 while True:
   print("Hola! selecciona una opcion que quieras realizar (escribe el numero):")
