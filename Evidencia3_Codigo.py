@@ -400,12 +400,10 @@ while True:
     print('Favor de ingresar los siguientes datos')
     nombre_genero = input('->\tNombre del género literario: ')
 
-    ide_genero = max(datos_genero, default=0)+1
-    datos_genero[ide_genero] = [nombre_genero]
-    print(datos_genero)
-    valores_genero = (ide_genero, nombre_genero)
+    valores_genero = (nombre_genero)
     # Lo añadimos a la tabla GENERO en la base de datos
-    bi_cursor.execute("INSERT INTO GENERO VALUES (?,?)", valores_genero)
+    bi_cursor.execute("INSERT INTO GENERO VALUES (?)", valores_genero)
+    print(f"la clave agregada fue: {bi_cursor.lastrowid}")
 
   elif op_main == 5:
     # Sale del programa
