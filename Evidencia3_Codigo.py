@@ -10,24 +10,21 @@ datos_leer = dict()
 
 datos = {}
 
+# Aquí reviso si existe un archivo llamado biblioteca.db que es donde aparece la base de datos
 if not os.path.exists("biblioteca.db"):
-    print('No se ha encontrado una versión de datos previa. Se procede a crear un almacén de datos a continuación')
-    print('\tGenerando almacén de datos . . .')
-    
-    try:
-        with sqlite3.connect("biblioteca.db") as conn:
-            bi_cursor = conn.cursor()
-            bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, autor VARCHAR2(32) NOT NULL, genero VARCHAR2(16) NOT NULL, año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
-        #for identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion in lector:
-          #datos_leer[int(identificador)] = (titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion)
-            print('AVISO:\t¡Almacén generado con éxito!\n')
-    except Error as e:
-        print(f'¿Aquí? {e}')
-    except:
-        print(f'Error producido: {sys.exc_info()[0]}')
+  # Si NO existe, se avisa al usuario y muestra un mensaje de que se está creando
+  print('No se ha encontrado una versión de datos previa. Se procede a crear un almacén de datos a continuación')
+  print('\tGenerando almacén de datos . . .')
+  
+  # Aquí creamos el almacén, nos conectamos a la base de datos y creamos una tabla ya que no existen     
+  with sqlite3.connect("biblioteca.db") as conn:
+    bi_cursor = conn.cursor()
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, autor VARCHAR2(32) NOT NULL, genero VARCHAR2(16) NOT NULL, año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
+    print('AVISO:\t¡Almacén generado con éxito!\n')
 else:
-    with sqlite3.connect("biblioteca.db") as conn:
-        bi_cursor = conn.cursor()    
+  # En caso de que SI exista un almacén de datos llamado así, simplemente hacemos una conexión a la base de datos
+  with sqlite3.connect("biblioteca.db") as conn:
+    bi_cursor = conn.cursor()    
 
 
 while True:
