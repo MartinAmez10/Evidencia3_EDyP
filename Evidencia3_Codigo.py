@@ -24,7 +24,7 @@ if not os.path.exists("biblioteca.db"):
   # Aquí creamos el almacén, nos conectamos a la base de datos y creamos una tabla ya que no existen     
   with sqlite3.connect("biblioteca.db") as conn:
     bi_cursor = conn.cursor()
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen), año_publicado DATE NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido DATE NOT NULL);")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen), año_publicado TEXT NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido TEXT NOT NULL);")
     bi_cursor.execute("CREATE TABLE IF NOT EXISTS GENERO (Id_gen INT PRIMARY KEY NOT NULL, nomGen VARCHAR2(20) NOT NULL);")
     bi_cursor.execute("CREATE TABLE IF NOT EXISTS AUTOR (Id_autor INT PRIMARY KEY NOT NULL, apAutor VARCHAR2(32) NOT NULL, nomAutor VARCHAR2(32) NOT NULL)")
     print('AVISO:\t¡Almacén generado con éxito!\n')
