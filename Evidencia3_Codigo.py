@@ -379,7 +379,7 @@ while True:
     print('Favor de ingresar los siguientes datos')
     apellidos_autor = input('->\tApellidos: ')
     nombres_autor = input('->\tNombre(s): ')
-
+    
     ide_autor = max(datos_autor, default=0)+1
     datos_autor[ide_autor] = [apellidos_autor, nombres_autor]
     print(datos_autor)
