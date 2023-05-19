@@ -51,7 +51,7 @@ while True:
       genero = input(f"Cual es el genero de {titulo}: \n").upper()
       año_publicacion = input(f"En que año se publico {titulo}: \n").upper()
       ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
-      fecha_adquisicion = input(f"Cuando se adquirio {titulo}: \n").upper()
+      fecha_adquisicion = input(f"Cuando se adquirio {titulo} (En formato (YYYY/MM/DD): \n").upper()
       datos[identificador] = [titulo,autor,genero,año_publicacion,ISBN,fecha_adquisicion]
       print("Datos cargados!")
 
@@ -421,3 +421,4 @@ grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicaci
 grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
 archivo.close()
 conn.close()
+#A
