@@ -4,6 +4,7 @@ import os
 import openpyxl
 import sqlite3
 from sqlite3 import Error
+import datetime
 
 # Testing
 separador = "*"*100
