@@ -16,6 +16,8 @@ datos = {}
 datos_autor = {}
 datos_genero = {}
 
+año_actual = datetime.datetime.now().year
+
 # Aquí reviso si existe un archivo llamado biblioteca.db que es donde aparece la base de datos
 if not os.path.exists("biblioteca.db"):
   # Si NO existe, se avisa al usuario y muestra un mensaje de que se está creando
@@ -47,53 +49,74 @@ while True:
   if op_main == 1:
     # Registro de nuevo ejemplar
     while True:
-      identificador = max(datos, default=0)+1
-      titulo = input("Dame el nombre del libro: \n").upper()
-      autor_nombre = input(f"Dame unicamente el NOMBRE del autor de {titulo}: \n").upper()
-      autor_apellidos = input(f"Dame unicamente los APELLIDOS del autor de {titulo}: \n").upper()
-      autor = (autor_nombre + ' ' + autor_apellidos)
-      valorEvaluar_autor = {"nomAutor":autor_nombre}
-      bi_cursor.execute("SELECT Id_autor FROM AUTOR WHERE nomAutor = :nomAutor", valorEvaluar_autor)
-      log_evaluarAutor = bi_cursor.fetchall()
-      #valores_ameter_autor = (autor_nombre, autor_apellidos)
-      if log_evaluarAutor:
-        for Id_autor in log_evaluarAutor:
-          autor_id_evaluado = Id_autor
-      else:
-        bi_cursor.execute("SELECT Id_autor FROM AUTOR")
-        ultima_id_autor = bi_cursor.lastrowid + 1
-        valores_ameter_autor = (ultima_id_autor, autor_apellidos, autor_nombre)
-        bi_cursor.execute("INSERT INTO AUTOR VALUES(?,?,?)", valores_ameter_autor)
-        autor_id_evaluado = ultima_id_autor
+        #####################################################################################################################
+        #####################################################################################################################
+        # MODIFICAR AQUÍ, EN CASO DE QUE NO SE HAYAN ENCONTRADO DATOS PREVIAMENTE CARGADOS, NO DEJAR ENTRAR EN ESTA OPCION PARA EL
+        # REGISTRO DE AUTORES Y GENEROS
+        identificador = max(datos, default=0)+1
+        titulo = input("Dame el nombre del libro: \n").upper()
+        autor_nombre = input(f"Dame unicamente el NOMBRE del autor de {titulo}: \n").upper()
+        autor_apellidos = input(f"Dame unicamente los APELLIDOS del autor de {titulo}: \n").upper()
+        autor = (autor_nombre + ' ' + autor_apellidos)
+        valorEvaluar_autor = {"nomAutor":autor_nombre}
+        bi_cursor.execute("SELECT Id_autor FROM AUTOR WHERE nomAutor = :nomAutor", valorEvaluar_autor)
+        log_evaluarAutor = bi_cursor.fetchall()
+        #valores_ameter_autor = (autor_nombre, autor_apellidos)
+        if log_evaluarAutor:
+            for Id_autor in log_evaluarAutor:
+                autor_id_evaluado = Id_autor
+        else:
+            bi_cursor.execute("SELECT Id_autor FROM AUTOR")
+            ultima_id_autor = bi_cursor.lastrowid + 1
+            valores_ameter_autor = (ultima_id_autor, autor_apellidos, autor_nombre)
+            bi_cursor.execute("INSERT INTO AUTOR VALUES(?,?,?)", valores_ameter_autor)
+            autor_id_evaluado = ultima_id_autor
 
-      genero = input(f"Cual es el genero de {titulo}: \n").upper()
+        genero = input(f"Cual es el genero de {titulo}: \n").upper()
 
-      valorEvaluar_genero = {"nomGen":genero}
-      bi_cursor.execute("SELECT Id_gen FROM GENERO WHERE nomGen = :nomGen", valorEvaluar_genero)
-      log_evaluarGen = bi_cursor.fetchall()
+        valorEvaluar_genero = {"nomGen":genero}
+        bi_cursor.execute("SELECT Id_gen FROM GENERO WHERE nomGen = :nomGen", valorEvaluar_genero)
+        log_evaluarGen = bi_cursor.fetchall()
 
-      if log_evaluarGen:
-        for Id_gen in log_evaluarGen:
-          genero_id_evaluado = Id_gen
-      else:
-        bi_cursor.execute("SELECT Id_gen FROM GENERO")
-        ultima_id_genero = bi_cursor.lastrowid + 1
-        valores_ameter_genero = (ultima_id_genero, genero)
-        bi_cursor.execute("INSERT INTO GENERO VALUES(?, ?)", valores_ameter_genero)
-        genero_id_evaluado = ultima_id_genero
+        if log_evaluarGen:
+            for Id_gen in log_evaluarGen:
+                genero_id_evaluado = Id_gen
+        else:
+            bi_cursor.execute("SELECT Id_gen FROM GENERO")
+            ultima_id_genero = bi_cursor.lastrowid + 1
+            valores_ameter_genero = (ultima_id_genero, genero)
+            bi_cursor.execute("INSERT INTO GENERO VALUES(?, ?)", valores_ameter_genero)
+            genero_id_evaluado = ultima_id_genero
+            
+        while True:
+            try:
+                año_publicacion = int(input(f"En que año se publico {titulo}: \n").upper())
+                if año_publicacion <= año_actual:
+                    break
+                else:
+                    print('\tVALUE ERROR: Año fuera de los parámetros permitidos, Ingresar un año válido a la fecha actual')
+            except Exception:
+                print('TYPE ERROR: Ingrese solamente valores numéricos para la fecha')
         
-      año_publicacion = input(f"En que año se publico {titulo}: \n").upper()
-      ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
-      fecha_adquisicion = input(f"Cuando se adquirio {titulo} (En formato (YYYY/MM/DD): \n").upper()
-      datos[identificador] = [titulo,autor,genero,año_publicacion,ISBN,fecha_adquisicion]
-      print("Datos cargados!")
+        ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
+        while True:
+            try:
+                fecha_adquisicion = input(f"Cuando se adquirio {titulo} (En formato (DD//MM/YYYY): \n").upper()
+                fecha_adquisicion= datetime.datetime.strptime(fecha_adquisicion, "%d/%m/%Y").date()
+                break
+            except Exception:
+                print("la fecha capturada no es valida")
+                print("vuelve a ingresar la fecha")
+                
+        datos[identificador] = [titulo,autor,genero,año_publicacion,ISBN,fecha_adquisicion]
+        print("Datos cargados!")
 
-      # Ingresamos estos datos en la base de datos generada
-      valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
-      bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
-      op_registro = input("Deseas agregar mas?(En caso de no querer, presione Enter) \n")
-      if op_registro.strip() == "":
-        break
+        # Ingresamos estos datos en la base de datos generada
+        valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
+        bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
+        op_registro = input("Deseas agregar mas?(En caso de no querer, presione Enter) \n")
+        if op_registro.strip() == "":
+            break
 
   elif op_main == 2:
     # Consultas y Reportes
@@ -151,26 +174,21 @@ while True:
         # Reportes tabulados
         while True:
           print("Escoge una forma de filtrar los datos:")
-          print("[1]- Por autor")
-          print("[2]- Por genero")
-          print("[3]- Por año de publicacion")
-          print("[4]- Catálogo completo")
+          print("[1]- Catálogo completo")
+          print("[2]- Por autor")
+          print("[3]- Por genero")
+          print("[4]- Por año de publicacion")
           print("[5]- Regresar al menu anterior")
           op_reporte = int(input())
           if op_reporte == 1:
+            # Catálogo completo
             datos_grabar = dict()
-            # Filtro por autor
-            print('Seleccione entre los siguientes autores:')
-            for j in datos:
-              #print('Seleccione entre las siguientes opciones:')
-              print(datos[j][1])
-            filtro_autor = input("Dame el autor: \n").upper()
+            print("DATOS GUARDADOS:")
             print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            for i in datos:
-              if filtro_autor == datos[i][1]:
-                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                print('\n')
+            print(separador)
+            for i in datos: 
+              print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+            print(separador)
 
             # Exportación a formatos CSV o MsExcel
             print("Desea exportar los datos a algun formato de los siguientes?")
@@ -221,20 +239,21 @@ while True:
               print("Se exporto de manera correcta")
               break
           elif op_reporte == 2:
+            # Filtro por autor
             datos_grabar = dict()
-            # Filtro por género
-            print('Seleccione entre los siguientes Géneros:')
+            print('Seleccione entre los siguientes autores:')
             for j in datos:
               #print('Seleccione entre las siguientes opciones:')
-              print(datos[j][2])
-            
-            filtro_genero = input("Dame el genero: \n").upper()
+              print(datos[j][1])
+            filtro_autor = input("Dame el autor: \n").upper()
+
             print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
             for i in datos:
-              if filtro_genero == datos[i][2]:
+              if filtro_autor == datos[i][1]:
                 print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
                 datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
                 print('\n')
+
 
             # Exportación a formatos CSV o MsExcel
             print("Desea exportar los datos a algun formato de los siguientes?")
@@ -286,17 +305,17 @@ while True:
               break
 
           elif op_reporte == 3:
-            # Filtrado por año
+            # Filtro por género
             datos_grabar = dict()
-            print('Seleccione entre los siguientes Años de Publicacion:')
+            print('Seleccione entre los siguientes Géneros:')
             for j in datos:
               #print('Seleccione entre las siguientes opciones:')
-              print(datos[j][3])
-
-            filtro_año = input("Dame el año de publicacion: \n").upper()
+              print(datos[j][2])
+            
+            filtro_genero = input("Dame el genero: \n").upper()
             print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
             for i in datos:
-              if filtro_año == datos[i][3]:
+              if filtro_genero == datos[i][2]:
                 print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
                 datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
                 print('\n')
@@ -351,13 +370,19 @@ while True:
               break
 
           elif op_reporte == 4:
-            # Catálogo completo
-            print("DATOS GUARDADOS:")
+            # Filtrado por año
+            datos_grabar = dict()
+            print('Seleccione entre los siguientes Años de Publicacion:')
+            for j in datos:
+              print(datos[j][3])
+
+            filtro_año = input("Dame el año de publicacion: \n").upper()
             print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            print(separador)
-            for i in datos: 
-              print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-            print(separador)
+            for i in datos:
+              if filtro_año == datos[i][3]:
+                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                print('\n')
 
             # exportacion a formato CSV o a MsExcel
             print("Desea exportar los datos a algun formato de los siguientes?")
@@ -432,10 +457,12 @@ while True:
     print('Favor de ingresar los siguientes datos')
     nombre_genero = input('->\tNombre del género literario: ')
 
-    valores_genero = (nombre_genero)
+    ide_genero = max(datos_genero, default=0)+1
+    datos_genero[ide_genero] = [nombre_genero]
+    print(datos_genero)
+    valores_genero = (ide_genero, nombre_genero)
     # Lo añadimos a la tabla GENERO en la base de datos
-    bi_cursor.execute("INSERT INTO GENERO VALUES (?)", valores_genero)
-    print(f"la clave agregada fue: {bi_cursor.lastrowid}")
+    bi_cursor.execute("INSERT INTO GENERO VALUES (?,?)", valores_genero)
 
   elif op_main == 5:
     # Sale del programa
