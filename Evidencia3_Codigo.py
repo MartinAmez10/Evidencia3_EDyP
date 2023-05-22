@@ -118,325 +118,337 @@ while True:
             break
 
   elif op_main == 2:
-    # Consultas y Reportes
-    while True:
-      print("Selecciona una opcion que quieras realizar (escribe el numero):")
-      print("[1]- Consulta de titulo")
-      print("[2]- Reportes")
-      print("[3]- Regresar al menu principal")
-      op_consulta = int(input())
-      
-      # Separamos por la opción seleccionada
-      if op_consulta == 1:
-        # Consulta de título o ISBN
-        while True:
-          print("De que forma deseas buscar el libro?(escribe el numero):")
-          print("[1]- Por titulo")
-          print("[2]- Por ISBN")
-          print("[3]- Regresar al menu anterior")
-          op_busqueda = int(input())
-          if op_busqueda == 1:
-            # Muestra el catálago de Libros (POR TÍTULO)
-            for i in datos:
-              print(datos[i][0])
-            # Añadí esto para filtrar por título y mostrar información (Maybe lo módifico)
-            titulo_buscar = input('Seleccione el título a mostrar: ').upper()
-            for i in datos:
-              if titulo_buscar == datos[i][0]:
-                print(''*5, ' Datos del libro ', ''*5)
-                print('\tTítulo: ', datos[i][0])
-                print('\tAutor: ', datos[i][1])
-                print('\tGénero: ', datos[i][2])
-                print('\tAño de Publicación: ', datos[i][3])
-                print('\tISBN: ', datos[i][4])
-                print('\tFecha de Adquisición: ', datos[i][5])
-                print(separador)
+    with sqlite3.connect("biblioteca.db") as conn:
+      bi_cursor = conn.cursor()
+      bi_cursor.execute("SELECT * FROM BIBLIOTECA")
+      registro_datos = bi_cursor.fetchall()
+    if registro_datos:
+        # Consultas y Reportes
+      while True:
+        print("Selecciona una opcion que quieras realizar (escribe el numero):")
+        print("[1]- Consulta de titulo")
+        print("[2]- Reportes")
+        print("[3]- Regresar al menu principal")
+        op_consulta = int(input())
+        
+        # Separamos por la opción seleccionada
+        if op_consulta == 1:
+          # Consulta de título o ISBN
+          while True:
+            print("De que forma deseas buscar el libro?(escribe el numero):")
+            print("[1]- Por titulo")
+            print("[2]- Por ISBN")
+            print("[3]- Regresar al menu anterior")
+            op_busqueda = int(input())
+            if op_busqueda == 1:
+              # Muestra el catálago de Libros (POR TÍTULO)
+              for i in datos:
+                print(datos[i][0])
+              # Añadí esto para filtrar por título y mostrar información (Maybe lo módifico)
+              titulo_buscar = input('Seleccione el título a mostrar: ').upper()
+              for i in datos:
+                if titulo_buscar == datos[i][0]:
+                  print(''*5, ' Datos del libro ', ''*5)
+                  print('\tTítulo: ', datos[i][0])
+                  print('\tAutor: ', datos[i][1])
+                  print('\tGénero: ', datos[i][2])
+                  print('\tAño de Publicación: ', datos[i][3])
+                  print('\tISBN: ', datos[i][4])
+                  print('\tFecha de Adquisición: ', datos[i][5])
+                  print(separador)
+                  break
+            elif op_busqueda == 2:
+              # Muestra el libro (POR ISBN)
+              # 1h Para hacer esto dios mio, ya hace falta dormir
+              isbn_buscar = input('Ingrese el ISBN: ')
+              for i in datos:
+                if isbn_buscar == datos[i][4]:
+                  print(''*5, ' Datos del libro ', ''*5)
+                  print('ISBN seleccionado: ', isbn_buscar)
+                  print('\tTítulo: ', datos[i][0])
+                  print('\tAutor: ', datos[i][1])
+                  print('\tGénero: ', datos[i][2])
+                  print('\tAño de Publicación: ', datos[i][3])
+                  print('\tFecha de Adquisición: ', datos[i][5])
+                  print(separador) 
+                  break            
+            elif op_busqueda == 3:
+              break
+        elif op_consulta == 2:
+          # Reportes tabulados
+          while True:
+            print("Escoge una forma de filtrar los datos:")
+            print("[1]- Catálogo completo")
+            print("[2]- Por autor")
+            print("[3]- Por genero")
+            print("[4]- Por año de publicacion")
+            print("[5]- Regresar al menu anterior")
+            op_reporte = int(input())
+            if op_reporte == 1:
+              # Catálogo completo
+              datos_grabar = dict()
+              print("DATOS GUARDADOS:")
+              print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
+              print(separador)
+              for i in datos: 
+                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+              print(separador)
+
+              # Exportación a formatos CSV o MsExcel
+              print("Desea exportar los datos a algun formato de los siguientes?")
+              print("[1]- CSV")
+              print("[2]- MsExcel")
+              print("[3]- Ninguno")
+              op_exportar = int(input())
+
+              # exportacion a CSV o MsExcel
+              if op_exportar == 1:
+                for j in datos:
+                  datos_grabar = datos
+                archivo = open('logs_catalogo_completo.csv', 'w', newline='')
+                grabador = csv.writer(archivo)
+                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                print("Se exporto correctamente!")
+                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                archivo.close()
+                #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
                 break
-          elif op_busqueda == 2:
-            # Muestra el libro (POR ISBN)
-            # 1h Para hacer esto dios mio, ya hace falta dormir
-            isbn_buscar = input('Ingrese el ISBN: ')
-            for i in datos:
-              if isbn_buscar == datos[i][4]:
-                print(''*5, ' Datos del libro ', ''*5)
-                print('ISBN seleccionado: ', isbn_buscar)
-                print('\tTítulo: ', datos[i][0])
-                print('\tAutor: ', datos[i][1])
-                print('\tGénero: ', datos[i][2])
-                print('\tAño de Publicación: ', datos[i][3])
-                print('\tFecha de Adquisición: ', datos[i][5])
-                print(separador) 
-                break            
-          elif op_busqueda == 3:
-            break
-      elif op_consulta == 2:
-        # Reportes tabulados
-        while True:
-          print("Escoge una forma de filtrar los datos:")
-          print("[1]- Catálogo completo")
-          print("[2]- Por autor")
-          print("[3]- Por genero")
-          print("[4]- Por año de publicacion")
-          print("[5]- Regresar al menu anterior")
-          op_reporte = int(input())
-          if op_reporte == 1:
-            # Catálogo completo
-            datos_grabar = dict()
-            print("DATOS GUARDADOS:")
-            print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            print(separador)
-            for i in datos: 
-              print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-            print(separador)
-
-            # Exportación a formatos CSV o MsExcel
-            print("Desea exportar los datos a algun formato de los siguientes?")
-            print("[1]- CSV")
-            print("[2]- MsExcel")
-            print("[3]- Ninguno")
-            op_exportar = int(input())
-
-            # IF para filtrar el formato deseado
-            # Exportación a CSV
-            if op_exportar == 1:
-              #for j in datos:
-                #datos_grabar = datos
-              archivo = open('logs_autor_' + filtro_autor.lower() + '.csv', 'w', newline='')
-              grabador = csv.writer(archivo)
-              grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
-              print("Se exporto correctamente!")
-              grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
-              archivo.close()
-              #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
-              break
-          
-            # Exportación a MsExcel
-            if op_exportar == 2:
-              libro = openpyxl.Workbook()
-              hoja = libro["Sheet"]
-              hoja.title = "primera"
-              hoja["A1"].value = "Identificador"
-              hoja["B1"].value = "Titulo"
-              hoja["C1"].value = "Autor"
-              hoja["D1"].value = "Genero"
-              hoja["E1"].value = "Año de publicacion"
-              hoja["F1"].value = "ISBN"
-              hoja["G1"].value = "Fecha adquisicion"
-
-              fila = 2
-              for identificador, dato in datos.items():
-                hoja.cell(row=fila, column=1).value = identificador
-                hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                fila += 1
-
-              libro.save("reporte_libros.xlsx")
-              print("Se exporto de manera correcta")
-              break
-          elif op_reporte == 2:
-            # Filtro por autor
-            datos_grabar = dict()
-            print('Seleccione entre los siguientes autores:')
-            for j in datos:
-              #print('Seleccione entre las siguientes opciones:')
-              print(datos[j][1])
-            filtro_autor = input("Dame el autor: \n").upper()
-
-            print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            for i in datos:
-              if filtro_autor == datos[i][1]:
-                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                print('\n')
-
-
-            # Exportación a formatos CSV o MsExcel
-            print("Desea exportar los datos a algun formato de los siguientes?")
-            print("[1]- CSV")
-            print("[2]- MsExcel")
-            print("[3]- Ninguno")
-            op_exportar = int(input())
-
-            # IF para filtrar el formato deseado
-            # Exportación a CSV
-            if op_exportar == 1:
-              #for j in datos:
-                #datos_grabar = datos
-              archivo = open('logs_genero_' + filtro_genero.lower() + '.csv', 'w', newline='')
-              grabador = csv.writer(archivo)
-              grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
-              print("Se exporto correctamente!")
-              grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
-              archivo.close()
-              #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
-              break
-          
-            # Exportación a MsExcel
-            if op_exportar == 2:
-              libro = openpyxl.Workbook()
-              hoja = libro["Sheet"]
-              hoja.title = "primera"
-              hoja["A1"].value = "Identificador"
-              hoja["B1"].value = "Titulo"
-              hoja["C1"].value = "Autor"
-              hoja["D1"].value = "Genero"
-              hoja["E1"].value = "Año de publicacion"
-              hoja["F1"].value = "ISBN"
-              hoja["G1"].value = "Fecha adquisicion"
-
-              fila = 2
-              for identificador, dato in datos.items():
-                hoja.cell(row=fila, column=1).value = identificador
-                hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                fila += 1
-
-              libro.save("reporte_libros.xlsx")
-              print("Se exporto de manera correcta")
-              break
-
-          elif op_reporte == 3:
-            # Filtro por género
-            datos_grabar = dict()
-            print('Seleccione entre los siguientes Géneros:')
-            for j in datos:
-              #print('Seleccione entre las siguientes opciones:')
-              print(datos[j][2])
             
-            filtro_genero = input("Dame el genero: \n").upper()
-            print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            for i in datos:
-              if filtro_genero == datos[i][2]:
-                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                print('\n')
+              # exportacion a MsExcel
+              if op_exportar == 2:
+                libro = openpyxl.Workbook()
+                hoja = libro["Sheet"]
+                hoja.title = "primera"
+                hoja["A1"].value = "Identificador"
+                hoja["B1"].value = "Titulo"
+                hoja["C1"].value = "Autor"
+                hoja["D1"].value = "Genero"
+                hoja["E1"].value = "Año de publicacion"
+                hoja["F1"].value = "ISBN"
+                hoja["G1"].value = "Fecha adquisicion"
 
-            # Exportación a formatos CSV o MsExcel
-            print("Desea exportar los datos a algun formato de los siguientes?")
-            print("[1]- CSV")
-            print("[2]- MsExcel")
-            print("[3]- Ninguno")
-            op_exportar = int(input())
+                fila = 2
+                for identificador, dato in datos.items():
+                  hoja.cell(row=fila, column=1).value = identificador
+                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  fila += 1
 
-            # IF para filtrar el formato deseado
-            # Exportación a CSV
-            if op_exportar == 1:
-              #for j in datos:
-                #datos_grabar = datos
-              archivo = open('logs_fecha_publicado_' + filtro_año + '.csv', 'w', newline='')
-              grabador = csv.writer(archivo)
-              grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
-              print("Se exporto correctamente!")
-              grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
-              archivo.close()
-              #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
-              break
-          
-            # Exportación a MsExcel
-            if op_exportar == 2:
-              libro = openpyxl.Workbook()
-              hoja = libro["Sheet"]
-              hoja.title = "primera"
-              hoja["A1"].value = "Identificador"
-              hoja["B1"].value = "Titulo"
-              hoja["C1"].value = "Autor"
-              hoja["D1"].value = "Genero"
-              hoja["E1"].value = "Año de publicacion"
-              hoja["F1"].value = "ISBN"
-              hoja["G1"].value = "Fecha adquisicion"
+                libro.save("reporte_completo.xlsx")
+                print("Se exporto de manera correcta")
+                break
 
-              fila = 2
-              for identificador, dato in datos.items():
-                hoja.cell(row=fila, column=1).value = identificador
-                hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                fila += 1
-
-              libro.save("reporte_libros.xlsx")
-              print("Se exporto de manera correcta")
-              break
-
-          elif op_reporte == 4:
-            # Filtrado por año
-            datos_grabar = dict()
-            print('Seleccione entre los siguientes Años de Publicacion:')
-            for j in datos:
-              print(datos[j][3])
-
-            filtro_año = input("Dame el año de publicacion: \n").upper()
-            print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-            for i in datos:
-              if filtro_año == datos[i][3]:
-                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                print('\n')
-
-            # exportacion a formato CSV o a MsExcel
-            print("Desea exportar los datos a algun formato de los siguientes?")
-            print("[1]- CSV")
-            print("[2]- MsExcel")
-            print("[3]- Ninguno")
-            op_exportar = int(input())
-
-            # exportacion a CSV o MsExcel
-            if op_exportar == 1:
+            elif op_reporte == 2:
+              # Filtro por autor
+              datos_grabar = dict()
+              print('Seleccione entre los siguientes autores:')
               for j in datos:
-                datos_grabar = datos
-              archivo = open('logs_catalogo_completo.csv', 'w', newline='')
-              grabador = csv.writer(archivo)
-              grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
-              print("Se exporto correctamente!")
-              grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
-              archivo.close()
-              #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
-              break
-          
-            # exportacion a MsExcel
-            if op_exportar == 2:
-              libro = openpyxl.Workbook()
-              hoja = libro["Sheet"]
-              hoja.title = "primera"
-              hoja["A1"].value = "Identificador"
-              hoja["B1"].value = "Titulo"
-              hoja["C1"].value = "Autor"
-              hoja["D1"].value = "Genero"
-              hoja["E1"].value = "Año de publicacion"
-              hoja["F1"].value = "ISBN"
-              hoja["G1"].value = "Fecha adquisicion"
+                #print('Seleccione entre las siguientes opciones:')
+                print(datos[j][1])
+              filtro_autor = input("Dame el autor: \n").upper()
 
-              fila = 2
-              for identificador, dato in datos.items():
-                hoja.cell(row=fila, column=1).value = identificador
-                hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                fila += 1
+              print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
+              for i in datos:
+                if filtro_autor == datos[i][1]:
+                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  print('\n')
+              
+              # AQUI
+                            # exportacion a formato CSV o a MsExcel
+              print("Desea exportar los datos a algun formato de los siguientes?")
+              print("[1]- CSV")
+              print("[2]- MsExcel")
+              print("[3]- Ninguno")
+              op_exportar = int(input())
+              
+              # IF para filtrar el formato deseado
+              # Exportación a CSV
+              if op_exportar == 1:
+                #for j in datos:
+                  #datos_grabar = datos
+                archivo = open('logs_autor_' + filtro_autor.lower() + '.csv', 'w', newline='')
+                grabador = csv.writer(archivo)
+                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                print("Se exporto correctamente!")
+                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                archivo.close()
+                #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
+                break
+            
+              # Exportación a MsExcel
+              if op_exportar == 2:
+                libro = openpyxl.Workbook()
+                hoja = libro["Sheet"]
+                hoja.title = "primera"
+                hoja["A1"].value = "Identificador"
+                hoja["B1"].value = "Titulo"
+                hoja["C1"].value = "Autor"
+                hoja["D1"].value = "Genero"
+                hoja["E1"].value = "Año de publicacion"
+                hoja["F1"].value = "ISBN"
+                hoja["G1"].value = "Fecha adquisicion"
 
-              libro.save("reporte_libros.xlsx")
-              print("Se exporto de manera correcta")
+                fila = 2
+                for identificador, dato in datos.items():
+                  hoja.cell(row=fila, column=1).value = identificador
+                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  fila += 1
+
+                libro.save("reporte_autor_" + filtro_autor.lower() + ".xlsx")
+                print("Se exporto de manera correcta")
+                break
+              # AQUI
+
+            elif op_reporte == 3:
+              # Filtro por género
+              datos_grabar = dict()
+              print('Seleccione entre los siguientes Géneros:')
+              for j in datos:
+                #print('Seleccione entre las siguientes opciones:')
+                print(datos[j][2])
+              
+              filtro_genero = input("Dame el genero: \n").upper()
+              print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
+              for i in datos:
+                if filtro_genero == datos[i][2]:
+                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  print('\n')
+
+              # Exportación a formatos CSV o MsExcel
+              print("Desea exportar los datos a algun formato de los siguientes?")
+              print("[1]- CSV")
+              print("[2]- MsExcel")
+              print("[3]- Ninguno")
+              op_exportar = int(input())
+
+              # IF para filtrar el formato deseado
+              # Exportación a CSV
+              if op_exportar == 1:
+                #for j in datos:
+                  #datos_grabar = datos
+                archivo = open('logs_genero_' + filtro_genero.lower() + '.csv', 'w', newline='')
+                grabador = csv.writer(archivo)
+                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                print("Se exporto correctamente!")
+                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                archivo.close()
+                #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
+                break
+            
+              # Exportación a MsExcel
+              if op_exportar == 2:
+                libro = openpyxl.Workbook()
+                hoja = libro["Sheet"]
+                hoja.title = "primera"
+                hoja["A1"].value = "Identificador"
+                hoja["B1"].value = "Titulo"
+                hoja["C1"].value = "Autor"
+                hoja["D1"].value = "Genero"
+                hoja["E1"].value = "Año de publicacion"
+                hoja["F1"].value = "ISBN"
+                hoja["G1"].value = "Fecha adquisicion"
+
+                fila = 2
+                for identificador, dato in datos.items():
+                  hoja.cell(row=fila, column=1).value = identificador
+                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  fila += 1
+
+                libro.save("reporte_libros.xlsx")
+                print("Se exporto de manera correcta")
+                break
+
+            elif op_reporte == 4:
+              # Filtrado por año
+              datos_grabar = dict()
+              print('Seleccione entre los siguientes Años de Publicacion:')
+              for j in datos:
+                print(datos[j][3])
+
+              filtro_año = input("Dame el año de publicacion: \n").upper()
+              print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
+              for i in datos:
+                if filtro_año == datos[i][3]:
+                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  print('\n')
+
+              # Exportación a formatos CSV o MsExcel
+              print("Desea exportar los datos a algun formato de los siguientes?")
+              print("[1]- CSV")
+              print("[2]- MsExcel")
+              print("[3]- Ninguno")
+              op_exportar = int(input())
+
+              # IF para filtrar el formato deseado
+              # Exportación a CSV
+              if op_exportar == 1:
+                #for j in datos:
+                  #datos_grabar = datos
+                archivo = open('logs_fecha_publicado_' + filtro_año + '.csv', 'w', newline='')
+                grabador = csv.writer(archivo)
+                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                print("Se exporto correctamente!")
+                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                archivo.close()
+                #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
+                break
+            
+              # Exportación a MsExcel
+              if op_exportar == 2:
+                libro = openpyxl.Workbook()
+                hoja = libro["Sheet"]
+                hoja.title = "primera"
+                hoja["A1"].value = "Identificador"
+                hoja["B1"].value = "Titulo"
+                hoja["C1"].value = "Autor"
+                hoja["D1"].value = "Genero"
+                hoja["E1"].value = "Año de publicacion"
+                hoja["F1"].value = "ISBN"
+                hoja["G1"].value = "Fecha adquisicion"
+
+                fila = 2
+                for identificador, dato in datos.items():
+                  hoja.cell(row=fila, column=1).value = identificador
+                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  fila += 1
+
+                libro.save("reporte_libros.xlsx")
+                print("Se exporto de manera correcta")
+                break
+              # AQUI
+            elif op_reporte == 5:
+              # Regresa al menú anterior
               break
-          elif op_reporte == 5:
-            # Regresa al menú anterior
-            break
-      elif op_consulta == 3:
-        # Regresa al menú anterior
-        print('Volviendo al menú principal . . .')
-        break
+        elif op_consulta == 3:
+          # Regresa al menú anterior
+          print('Volviendo al menú principal . . .')
+          break
+    else:
+      print('\tERROR: No hay datos que mostrar, favor de registrar un nuevo ejemplar, autor o género previamente')
+      print('\nRegresando al menú principal . . .')
+      esperar = input('Presione enter para continuar')
 
   elif op_main == 3:
     # Opción filtrada para: Registrar un Autor
