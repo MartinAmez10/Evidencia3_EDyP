@@ -3,7 +3,7 @@ import sys
 import os
 import openpyxl
 import sqlite3
-from sqlite3 import Error
+from sqlite3 import Error 
 import datetime
 
 # Testing
@@ -441,28 +441,111 @@ while True:
 
   elif op_main == 3:
     # Opción filtrada para: Registrar un Autor
-    print('Favor de ingresar los siguientes datos')
-    apellidos_autor = input('->\tApellidos: ')
-    nombres_autor = input('->\tNombre(s): ')
-    
-    ide_autor = max(datos_autor, default=0)+1
-    datos_autor[ide_autor] = [apellidos_autor, nombres_autor]
-    print(datos_autor)
-    
-    # Lo añadimos a la tabla AUTOR en la base de datos
-    bi_cursor.execute(f"INSERT INTO AUTOR VALUES ({ide_autor}, '{apellidos_autor}', '{nombres_autor}');")
+    with sqlite3.connect("biblioteca.db") as conn:
+      bi_cursor = conn.cursor()
+      bi_cursor.execute("SELECT * FROM AUTOR ")
+      bd_autor = bi_cursor.fetchall()
+
+      if bd_autor:
+        print("Se han encontrado los siguientes autores registrados:")
+        print(separador)
+        print("ID\tApellido\tNombre")
+        print(separador)
+        for Id_autor, apAutor, nomAutor in bd_autor:
+          print(f"{Id_autor:^6}\t{apAutor}\t{nomAutor}")
+
+        print(separador)
+        print("De los autores anteriormente presentados, desea agregar uno mas?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_autor = int(input())
+        if opcion_agregar_autor == 1:
+          print("Ingrese los siguientes datos:")
+          apellido_autor =  input("Apellido:")
+          nombre_autor = input("Nombre: ")
+
+          valores = (apellido_autor, nombre_autor)
+
+          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
+          tabla_autores = bi_cursor.fetchall()
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
+
+      else:
+        print("No se han encontrado autores registrados, desea agregar uno?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_autor = int(input())
+
+        if opcion_agregar_autor == 1:
+          print(separador)
+          print("ingresa los siguientes datos::")
+          apellido_autor =  input("Apellido:")
+          nombre_autor = input("Nombre: ")
+
+          valores = (apellido_autor, nombre_autor)
+
+          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
+          tabla_autores = bi_cursor.fetchall()
+
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
 
   elif op_main == 4:
     # Opción filtrada para: Registrar un Género
-    print('Favor de ingresar los siguientes datos')
-    nombre_genero = input('->\tNombre del género literario: ')
+    with sqlite3.connect("biblioteca.db") as conn:
+      bi_cursor = conn.cursor()
+      bi_cursor.execute("SELECT * FROM GENERO")
+      bd_genero = bi_cursor.fetchall()
 
-    ide_genero = max(datos_genero, default=0)+1
-    datos_genero[ide_genero] = [nombre_genero]
-    print(datos_genero)
-    valores_genero = (ide_genero, nombre_genero)
-    # Lo añadimos a la tabla GENERO en la base de datos
-    bi_cursor.execute("INSERT INTO GENERO VALUES (?,?)", valores_genero)
+      if bd_genero:
+        print("Se han encontrado los siguientes generos registrados:")
+        print(separador)
+        print("ID\tGenero")
+        print(separador)
+        for Id_gen, nomGen in bd_genero:
+          print(f"{Id_gen:^6}\t{nomGen}")
+
+        print(separador)
+        print("De los generos anteriormente presentados, desea agregar uno mas?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_genero = int(input())
+
+        if opcion_agregar_genero == 1:
+          print("Ingrese los siguientes datos:")
+          genero_nuevo = input("Genero: ")
+
+          bi_cursor.execute("INSERT INTO GENERO (nomGen) VALUES(?)", (genero_nuevo,))
+          tabla_genero = bi_cursor.fetchall()
+
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
+
+      else:
+        print("No se han encontrado generos registrados, desea agregar uno?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_genero = int(input())
+
+        if opcion_agregar_genero == 1:
+          print(separador)
+          print("ingresa los siguientes datos::")
+          genero_nuevo = input("Genero: ")
+
+          bi_cursor.execute("INSERT INTO GENERO (nomGen) VALUES(?)", (genero_nuevo,))
+          tabla_genero = bi_cursor.fetchall()
+
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
 
   elif op_main == 5:
     # Sale del programa
