@@ -1,5 +1,4 @@
 import csv
-import sys
 import os
 import openpyxl
 import sqlite3
