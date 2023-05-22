@@ -46,76 +46,95 @@ while True:
   op_main = int(input())
   
   if op_main == 1:
+
     # Registro de nuevo ejemplar
     while True:
-        #####################################################################################################################
-        #####################################################################################################################
-        # MODIFICAR AQUÍ, EN CASO DE QUE NO SE HAYAN ENCONTRADO DATOS PREVIAMENTE CARGADOS, NO DEJAR ENTRAR EN ESTA OPCION PARA EL
-        # REGISTRO DE AUTORES Y GENEROS
-        identificador = max(datos, default=0)+1
-        titulo = input("Dame el nombre del libro: \n").upper()
-        autor_nombre = input(f"Dame unicamente el NOMBRE del autor de {titulo}: \n").upper()
-        autor_apellidos = input(f"Dame unicamente los APELLIDOS del autor de {titulo}: \n").upper()
-        autor = (autor_nombre + ' ' + autor_apellidos)
-        valorEvaluar_autor = {"nomAutor":autor_nombre}
-        bi_cursor.execute("SELECT Id_autor FROM AUTOR WHERE nomAutor = :nomAutor", valorEvaluar_autor)
-        log_evaluarAutor = bi_cursor.fetchall()
-        #valores_ameter_autor = (autor_nombre, autor_apellidos)
-        if log_evaluarAutor:
-            for Id_autor in log_evaluarAutor:
-                autor_id_evaluado = Id_autor
-        else:
-            bi_cursor.execute("SELECT Id_autor FROM AUTOR")
-            ultima_id_autor = bi_cursor.lastrowid + 1
-            valores_ameter_autor = (ultima_id_autor, autor_apellidos, autor_nombre)
-            bi_cursor.execute("INSERT INTO AUTOR VALUES(?,?,?)", valores_ameter_autor)
-            autor_id_evaluado = ultima_id_autor
+      autor_nombre = ""
+      autor_apellidos = ""
+      genero_nombre = ""
+      autor_id_evaluado = 0
+      genero_id_evaluado = 0
 
-        genero = input(f"Cual es el genero de {titulo}: \n").upper()
+      identificador = max(datos, default=0) + 1
+      titulo = input("Dame el nombre del libro: \n").upper()
 
-        valorEvaluar_genero = {"nomGen":genero}
-        bi_cursor.execute("SELECT Id_gen FROM GENERO WHERE nomGen = :nomGen", valorEvaluar_genero)
-        log_evaluarGen = bi_cursor.fetchall()
+      # Leer autores de la base de datos
+      bi_cursor.execute("SELECT Id_autor, nomAutor, apAutor FROM AUTOR")
+      autores = bi_cursor.fetchall()
+      print("Autores disponibles:")
+      for autor in autores:
+        print(f"{autor[0]}. {autor[1]} {autor[2]}")
 
-        if log_evaluarGen:
-            for Id_gen in log_evaluarGen:
-                genero_id_evaluado = Id_gen
-        else:
-            bi_cursor.execute("SELECT Id_gen FROM GENERO")
-            ultima_id_genero = bi_cursor.lastrowid + 1
-            valores_ameter_genero = (ultima_id_genero, genero)
-            bi_cursor.execute("INSERT INTO GENERO VALUES(?, ?)", valores_ameter_genero)
-            genero_id_evaluado = ultima_id_genero
-            
-        while True:
-            try:
-                año_publicacion = int(input(f"En que año se publico {titulo}: \n").upper())
-                if año_publicacion <= año_actual:
-                    break
-                else:
-                    print('\tVALUE ERROR: Año fuera de los parámetros permitidos, Ingresar un año válido a la fecha actual')
-            except Exception:
-                print('TYPE ERROR: Ingrese solamente valores numéricos para la fecha')
-        
-        ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
-        while True:
-            try:
-                fecha_adquisicion = input(f"Cuando se adquirio {titulo} (En formato (DD//MM/YYYY): \n").upper()
-                fecha_adquisicion= datetime.datetime.strptime(fecha_adquisicion, "%d/%m/%Y").date()
-                break
-            except Exception:
-                print("la fecha capturada no es valida")
-                print("vuelve a ingresar la fecha")
-                
-        datos[identificador] = [titulo,autor,genero,año_publicacion,ISBN,fecha_adquisicion]
-        print("Datos cargados!")
-
-        # Ingresamos estos datos en la base de datos generada
-        valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
-        bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
-        op_registro = input("Deseas agregar mas?(En caso de no querer, presione Enter) \n")
-        if op_registro.strip() == "":
+      while True:
+        try:
+          autor_id_evaluado = int(input(f"Selecciona el ID del autor para {titulo}: "))
+          if autor_id_evaluado in [autor[0] for autor in autores]:
             break
+          else:
+            print("El ID ingresado no es válido. Ingresa un ID válido.")
+        except ValueError:
+          print("El ID ingresado no es válido. Ingresa un ID válido.")
+
+      # Leer géneros de la base de datos
+      bi_cursor.execute("SELECT Id_gen, nomGen FROM GENERO")
+      generos = bi_cursor.fetchall()
+      print("Géneros disponibles:")
+      for genero in generos:
+        print(f"{genero[0]}. {genero[1]}")
+
+      while True:
+        try:
+          genero_id_evaluado = int(input(f"Selecciona el ID del género para {titulo}: "))
+          if genero_id_evaluado in [genero[0] for genero in generos]:
+            break
+          else:
+            print("ID de género inválido. Ingresa un ID válido.")
+        except ValueError:
+          print("ID de género inválido. Ingresa un ID válido.")
+
+      # Obtener nombre y apellidos del autor seleccionado
+      for autor in autores:
+        if autor[0] == autor_id_evaluado:
+          autor_nombre = autor[1]
+          autor_apellidos = autor[2]
+          break
+
+      # Obtener nombre del género seleccionado
+      for genero in generos:
+        if genero[0] == genero_id_evaluado:
+          genero_nombre = genero[1]
+          break
+
+      while True:
+        año_publicacion = int(input(f"En qué año se publicó {titulo}: \n"))
+        if año_publicacion <= año_actual:
+          break
+        else:
+          print('VALUE ERROR: Año fuera de los parámetros permitidos. Ingresar un año válido a la fecha actual.')
+
+      ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
+
+      while True:
+        try:
+          fecha_adquisicion = input("Cuándo se adquirió el libro (En formato DD/MM/YYYY): \n")
+          fecha_adquisicion = datetime.datetime.strptime(fecha_adquisicion, "%d/%m/%Y").date()
+          break
+        except ValueError:
+          print("La fecha capturada no es válida. Vuelve a ingresar la fecha en el formato indicado.")
+
+      datos[identificador] = [titulo, f"{autor_nombre} {autor_apellidos}", genero_nombre, año_publicacion, ISBN, fecha_adquisicion]
+      print("Datos cargados!")
+
+      # Ingresamos estos datos en la base de datos generada
+      valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
+      bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
+
+      op_registro = input("¿Deseas agregar más? (Presiona Enter para no agregar más)\n")
+      if op_registro.strip() == "":
+        break
+
+    print("")
+
 
   elif op_main == 2:
     with sqlite3.connect("biblioteca.db") as conn:
