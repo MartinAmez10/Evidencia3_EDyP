@@ -47,100 +47,121 @@ while True:
   
   if op_main == 1:
 
-    # Registro de nuevo ejemplar
-    while True:
-      autor_nombre = ""
-      autor_apellidos = ""
-      genero_nombre = ""
-      autor_id_evaluado = 0
-      genero_id_evaluado = 0
+    with sqlite3.connect("biblioteca.db") as conn:
+      bi_cursor = conn.cursor()
+      bi_cursor.execute("SELECT * FROM AUTOR, GENERO")
+      registro_datos = bi_cursor.fetchall()
 
-      identificador = max(datos, default=0) + 1
-      titulo = input("Dame el nombre del libro: \n").upper()
-
-      # Leer autores de la base de datos
-      bi_cursor.execute("SELECT Id_autor, nomAutor, apAutor FROM AUTOR")
-      autores = bi_cursor.fetchall()
-      print("Autores disponibles:")
-      for autor in autores:
-        print(f"{autor[0]}. {autor[1]} {autor[2]}")
-
+    if registro_datos:
+        
+      # Registro de nuevo ejemplar
       while True:
-        try:
-          autor_id_evaluado = int(input(f"Selecciona el ID del autor para {titulo}: "))
-          if autor_id_evaluado in [autor[0] for autor in autores]:
-            break
-          else:
+        autor_nombre = ""
+        autor_apellidos = ""
+        genero_nombre = ""
+        autor_id_evaluado = 0
+        genero_id_evaluado = 0
+
+        identificador = max(datos, default=0) + 1
+        titulo = input("Dame el nombre del libro: \n").upper()
+
+        # Leer autores de la base de datos
+        bi_cursor.execute("SELECT Id_autor, nomAutor, apAutor FROM AUTOR")
+        autores = bi_cursor.fetchall()
+        print("Autores disponibles:")
+        for autor in autores:
+          print(f"{autor[0]}. {autor[1]} {autor[2]}")
+
+        while True:
+          try:
+            autor_id_evaluado = int(input(f"Selecciona el ID del autor para {titulo}: "))
+            if autor_id_evaluado in [autor[0] for autor in autores]:
+              break
+            else:
+              print("El ID ingresado no es válido. Ingresa un ID válido.")
+          except ValueError:
             print("El ID ingresado no es válido. Ingresa un ID válido.")
-        except ValueError:
-          print("El ID ingresado no es válido. Ingresa un ID válido.")
 
-      # Leer géneros de la base de datos
-      bi_cursor.execute("SELECT Id_gen, nomGen FROM GENERO")
-      generos = bi_cursor.fetchall()
-      print("Géneros disponibles:")
-      for genero in generos:
-        print(f"{genero[0]}. {genero[1]}")
+        # Leer géneros de la base de datos
+        bi_cursor.execute("SELECT Id_gen, nomGen FROM GENERO")
+        generos = bi_cursor.fetchall()
+        print("Géneros disponibles:")
+        for genero in generos:
+          print(f"{genero[0]}. {genero[1]}")
 
-      while True:
-        try:
-          genero_id_evaluado = int(input(f"Selecciona el ID del género para {titulo}: "))
-          if genero_id_evaluado in [genero[0] for genero in generos]:
+        while True:
+          try:
+            genero_id_evaluado = int(input(f"Selecciona el ID del género para {titulo}: "))
+            if genero_id_evaluado in [genero[0] for genero in generos]:
+              break
+            else:
+              print("ID de género inválido. Ingresa un ID válido.")
+          except ValueError:
+            print("ID de género inválido. Ingresa un ID válido.")
+
+        # Obtener nombre y apellidos del autor seleccionado
+        for autor in autores:
+          if autor[0] == autor_id_evaluado:
+            autor_nombre = autor[1]
+            autor_apellidos = autor[2]
+            break
+
+        # Obtener nombre del género seleccionado
+        for genero in generos:
+          if genero[0] == genero_id_evaluado:
+            genero_nombre = genero[1]
+            break
+
+        while True:
+          año_publicacion = int(input(f"En qué año se publicó {titulo}: \n"))
+          if año_publicacion <= año_actual:
             break
           else:
-            print("ID de género inválido. Ingresa un ID válido.")
-        except ValueError:
-          print("ID de género inválido. Ingresa un ID válido.")
+            print('VALUE ERROR: Año fuera de los parámetros permitidos. Ingresar un año válido a la fecha actual.')
 
-      # Obtener nombre y apellidos del autor seleccionado
-      for autor in autores:
-        if autor[0] == autor_id_evaluado:
-          autor_nombre = autor[1]
-          autor_apellidos = autor[2]
+        ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
+
+        while True:
+          try:
+            fecha_adquisicion = input("Cuándo se adquirió el libro (En formato DD/MM/YYYY): \n")
+            fecha_adquisicion = datetime.datetime.strptime(fecha_adquisicion, "%d/%m/%Y").date()
+            break
+          except ValueError:
+            print("La fecha capturada no es válida. Vuelve a ingresar la fecha en el formato indicado.")
+
+        datos[identificador] = [titulo, f"{autor_nombre} {autor_apellidos}", genero_nombre, año_publicacion, ISBN, fecha_adquisicion]
+        print("Datos cargados!")
+
+        with sqlite3.connect("biblioteca.db") as conn:
+          bi_cursor = conn.cursor()
+          # Ingresamos estos datos en la base de datos generada
+          valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
+          bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
+
+        op_registro = input("¿Deseas agregar más? (Presiona Enter para no agregar más)\n")
+        if op_registro.strip() == "":
           break
 
-      # Obtener nombre del género seleccionado
-      for genero in generos:
-        if genero[0] == genero_id_evaluado:
-          genero_nombre = genero[1]
-          break
-
-      while True:
-        año_publicacion = int(input(f"En qué año se publicó {titulo}: \n"))
-        if año_publicacion <= año_actual:
-          break
-        else:
-          print('VALUE ERROR: Año fuera de los parámetros permitidos. Ingresar un año válido a la fecha actual.')
-
-      ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
-
-      while True:
-        try:
-          fecha_adquisicion = input("Cuándo se adquirió el libro (En formato DD/MM/YYYY): \n")
-          fecha_adquisicion = datetime.datetime.strptime(fecha_adquisicion, "%d/%m/%Y").date()
-          break
-        except ValueError:
-          print("La fecha capturada no es válida. Vuelve a ingresar la fecha en el formato indicado.")
-
-      datos[identificador] = [titulo, f"{autor_nombre} {autor_apellidos}", genero_nombre, año_publicacion, ISBN, fecha_adquisicion]
-      print("Datos cargados!")
-
-      # Ingresamos estos datos en la base de datos generada
-      valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
-      bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
-
-      op_registro = input("¿Deseas agregar más? (Presiona Enter para no agregar más)\n")
-      if op_registro.strip() == "":
-        break
-
-    print("")
-
+      print("")
+    else:
+      print('\tERROR: Favor de registrar un autor o género previamente')
+      print('\nRegresando al menú principal . . .')
+      esperar = input('Presione enter para continuar')
 
   elif op_main == 2:
     with sqlite3.connect("biblioteca.db") as conn:
       bi_cursor = conn.cursor()
-      bi_cursor.execute("SELECT * FROM BIBLIOTECA")
+      bi_cursor.execute("SELECT titulo, año_publicado FROM BIBLIOTECA")
       registro_datos = bi_cursor.fetchall()
+
+      #bi_cursor.execute("SELECT titulo, año_publicado FROM BIBLIOTECA")
+      #regDat = bi_cursor.fetchall()
+      #if regDat:
+        #for titulo, año_publicado in regDat:
+          #print(f'{titulo}\t{año_publicado}')
+      #else:
+        #print('No se guardan los datos')
+
     if registro_datos:
         # Consultas y Reportes
       while True:
@@ -161,36 +182,44 @@ while True:
             op_busqueda = int(input())
             if op_busqueda == 1:
               # Muestra el catálago de Libros (POR TÍTULO)
-              for i in datos:
-                print(datos[i][0])
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                bi_cursor.execute("SELECT titulo FROM BIBLIOTECA")
+                registro_titulo = bi_cursor.fetchall()
+              if registro_titulo:
+                print('\nTítulos')
+                print(separador)
+                for titulo in registro_titulo:
+                  print(f'{titulo}')
               # Añadí esto para filtrar por título y mostrar información (Maybe lo módifico)
               titulo_buscar = input('Seleccione el título a mostrar: ').upper()
-              for i in datos:
-                if titulo_buscar == datos[i][0]:
-                  print(''*5, ' Datos del libro ', ''*5)
-                  print('\tTítulo: ', datos[i][0])
-                  print('\tAutor: ', datos[i][1])
-                  print('\tGénero: ', datos[i][2])
-                  print('\tAño de Publicación: ', datos[i][3])
-                  print('\tISBN: ', datos[i][4])
-                  print('\tFecha de Adquisición: ', datos[i][5])
-                  print(separador)
-                  break
+              valor_titulo = {"titulo":titulo_buscar}
+              bi_cursor.execute("SELECT * FROM BIBLIOTECA WHERE titulo = :titulo", valor_titulo)
+              registro_titulo_imprimir = bi_cursor.fetchall()
+
+              if registro_titulo_imprimir:
+                for Id_libro, titulo, nomAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_titulo_imprimir:
+                  print(f'{titulo}\t{nomAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+              else:
+                print('NO se encontró ningún libro con ese título')
+
+              print(' ')
             elif op_busqueda == 2:
               # Muestra el libro (POR ISBN)
-              # 1h Para hacer esto dios mio, ya hace falta dormir
               isbn_buscar = input('Ingrese el ISBN: ')
-              for i in datos:
-                if isbn_buscar == datos[i][4]:
-                  print(''*5, ' Datos del libro ', ''*5)
-                  print('ISBN seleccionado: ', isbn_buscar)
-                  print('\tTítulo: ', datos[i][0])
-                  print('\tAutor: ', datos[i][1])
-                  print('\tGénero: ', datos[i][2])
-                  print('\tAño de Publicación: ', datos[i][3])
-                  print('\tFecha de Adquisición: ', datos[i][5])
-                  print(separador) 
-                  break            
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                valores_isbn = {"ISBN": isbn_buscar}
+                bi_cursor.execute("SELECT * FROM BIBLIOTECA WHERE ISBN = :ISBN", valores_isbn)
+                registro_isbn = bi_cursor.fetchall()
+
+              if registro_isbn:
+                for Id_libro, titulo, nomAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_isbn:
+                  print(f'{titulo}\t{nomAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+              else:
+                print('ERROR: No se encontraron datos, asegurese de haber ingresado correctamente el ISBN')
+
+                        
             elif op_busqueda == 3:
               break
         elif op_consulta == 2:
@@ -209,9 +238,9 @@ while True:
               print("DATOS GUARDADOS:")
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
               print(separador)
-              for i in datos: 
-                print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-              print(separador)
+              #for i in datos: 
+                #print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+              #print(separador)
 
               # Exportación a formatos CSV o MsExcel
               print("Desea exportar los datos a algun formato de los siguientes?")
