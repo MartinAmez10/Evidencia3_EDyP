@@ -8,12 +8,12 @@ import datetime
 # Testing
 separador = "*"*100
 
-datos_grabar = dict()
-datos_leer = dict()
+#datos_grabar = dict()
+#datos_leer = dict()
 
-datos = {}
-datos_autor = {}
-datos_genero = {}
+#datos = {}
+#datos_autor = {}
+#datos_genero = {}
 
 año_actual = datetime.datetime.now().year
 
@@ -28,7 +28,7 @@ if not os.path.exists("biblioteca.db"):
     bi_cursor = conn.cursor()
     bi_cursor.execute("CREATE TABLE IF NOT EXISTS GENERO (Id_gen INTEGER PRIMARY KEY, nomGen TEXT NOT NULL);")
     bi_cursor.execute("CREATE TABLE IF NOT EXISTS AUTOR (Id_autor INTEGER PRIMARY KEY, apAutor TEXT NOT NULL, nomAutor TEXT NOT NULL);")
-    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INT PRIMARY KEY NOT NULL, titulo VARCHAR(32) NOT NULL, AUTOR INTEGER NOT NULL, GENERO INTEGER NOT NULL, año_publicado TEXT NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido TEXT NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen));")
+    bi_cursor.execute("CREATE TABLE IF NOT EXISTS BIBLIOTECA (Id_libro INTEGER PRIMARY KEY, titulo VARCHAR(32) NOT NULL, AUTOR INTEGER NOT NULL, GENERO INTEGER NOT NULL, año_publicado TEXT NOT NULL, ISBN VARCHAR2(13) NOT NULL, fecha_adquirido TEXT NOT NULL, FOREIGN KEY(AUTOR) REFERENCES AUTOR(Id_autor), FOREIGN KEY(GENERO) REFERENCES GENERO(Id_gen));")
     
     print('AVISO:\t¡Almacén generado con éxito!\n')
 else:
@@ -62,7 +62,7 @@ while True:
         autor_id_evaluado = 0
         genero_id_evaluado = 0
 
-        identificador = max(datos, default=0) + 1
+        #identificador = max(datos, default=0) + 1
         titulo = input("Dame el nombre del libro: \n").upper()
 
         # Leer autores de la base de datos
@@ -119,6 +119,7 @@ while True:
           else:
             print('VALUE ERROR: Año fuera de los parámetros permitidos. Ingresar un año válido a la fecha actual.')
 
+        
         ISBN = input(f"Cual es el ISBN de {titulo}: \n").upper()
 
         while True:
@@ -129,14 +130,17 @@ while True:
           except ValueError:
             print("La fecha capturada no es válida. Vuelve a ingresar la fecha en el formato indicado.")
 
-        datos[identificador] = [titulo, f"{autor_nombre} {autor_apellidos}", genero_nombre, año_publicacion, ISBN, fecha_adquisicion]
+        #datos[identificador] = [titulo, f"{autor_nombre} {autor_apellidos}", genero_nombre, año_publicacion, ISBN, fecha_adquisicion]
         print("Datos cargados!")
 
         with sqlite3.connect("biblioteca.db") as conn:
           bi_cursor = conn.cursor()
           # Ingresamos estos datos en la base de datos generada
-          valores_ejemplar = (identificador, titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
-          bi_cursor.execute("INSERT INTO BIBLIOTECA VALUES(?,?,?,?,?,?,?)", valores_ejemplar)
+          valores_ejemplar = (titulo, autor_id_evaluado, genero_id_evaluado, año_publicacion, ISBN, fecha_adquisicion)
+          bi_cursor.execute("INSERT INTO BIBLIOTECA (titulo, AUTOR, GENERO, año_publicado, ISBN, fecha_adquirido) VALUES (?,?,?,?,?,?)", valores_ejemplar)
+          tabla_biblioteca = bi_cursor.fetchall()
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
 
         op_registro = input("¿Deseas agregar más? (Presiona Enter para no agregar más)\n")
         if op_registro.strip() == "":
@@ -250,7 +254,7 @@ while True:
                 registro_catCompleto = bi_cursor.fetchall()
               if registro_catCompleto:
                 for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_catCompleto:
-                  print(f'{titulo}\t\t\t{nomAutor} {apAutor}\t\t{nomGen}\t{año_publicado}\t{ISBN}\t\t{fecha_adquirido}')
+                  print(f'{Id_libro}{titulo}\t\t\t{nomAutor} {apAutor}\t\t{nomGen}\t{año_publicado}\t{ISBN}\t\t{fecha_adquirido}')
              
 
               # Exportación a formatos CSV o MsExcel
@@ -508,7 +512,7 @@ while True:
               filtro_año = input("Dame el año de publicacion: \n").upper()
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
               valor_año = {"año_publicado":filtro_año}
-              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE GENERO.Id_gen = :Id_gen", valor_genero)
+              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE GENERO.Id_gen = :Id_gen", valor_año)
               registro_año_imprimir = bi_cursor.fetchall()
 
               if registro_año_imprimir:
@@ -645,62 +649,6 @@ while True:
         else:
           print("Regresando al menu principal...")
 
-  elif op_main == 3:
-    # Opción filtrada para: Registrar un Autor
-    with sqlite3.connect("biblioteca.db") as conn:
-      bi_cursor = conn.cursor()
-      bi_cursor.execute("SELECT * FROM AUTOR ")
-      bd_autor = bi_cursor.fetchall()
-
-      if bd_autor:
-        print("Se han encontrado los siguientes autores registrados:")
-        print(separador)
-        print("ID\tApellido\tNombre")
-        print(separador)
-        for Id_autor, apAutor, nomAutor in bd_autor:
-          print(f"{Id_autor:^6}\t{apAutor}\t{nomAutor}")
-
-        print(separador)
-        print("De los autores anteriormente presentados, desea agregar uno mas?:")
-        print("[1]- SI")
-        print("[2]- NO")
-        opcion_agregar_autor = int(input())
-        if opcion_agregar_autor == 1:
-          print("Ingrese los siguientes datos:")
-          apellido_autor =  input("Apellido:")
-          nombre_autor = input("Nombre: ")
-
-          valores = (apellido_autor, nombre_autor)
-
-          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
-          tabla_autores = bi_cursor.fetchall()
-          print("Se cargo correctamente!")
-          print(f"clave asignada: {bi_cursor.lastrowid}")
-        else:
-          print("Regresando al menu principal...")
-
-      else:
-        print("No se han encontrado autores registrados, desea agregar uno?:")
-        print("[1]- SI")
-        print("[2]- NO")
-        opcion_agregar_autor = int(input())
-
-        if opcion_agregar_autor == 1:
-          print(separador)
-          print("ingresa los siguientes datos::")
-          apellido_autor =  input("Apellido:")
-          nombre_autor = input("Nombre: ")
-
-          valores = (apellido_autor, nombre_autor)
-
-          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
-          tabla_autores = bi_cursor.fetchall()
-
-          print("Se cargo correctamente!")
-          print(f"clave asignada: {bi_cursor.lastrowid}")
-        else:
-          print("Regresando al menu principal...")
-
   elif op_main == 4:
     # Opción filtrada para: Registrar un Género
     with sqlite3.connect("biblioteca.db") as conn:
@@ -757,14 +705,14 @@ while True:
     # Sale del programa
     break
 
-for j in datos:
-  datos_grabar = datos
-archivo = open('logs_libros.csv', 'w', newline='')
+#for j in datos:
+  #datos_grabar = datos
+#archivo = open('logs_libros.csv', 'w', newline='')
 
-grabador = csv.writer(archivo)
-grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+#grabador = csv.writer(archivo)
+#grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
-grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
-archivo.close()
+#grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+#archivo.close()
 conn.close()
 #A
