@@ -194,12 +194,14 @@ while True:
               # Añadí esto para filtrar por título y mostrar información (Maybe lo módifico)
               titulo_buscar = input('Seleccione el título a mostrar: ').upper()
               valor_titulo = {"titulo":titulo_buscar}
-              bi_cursor.execute("SELECT * FROM BIBLIOTECA WHERE titulo = :titulo", valor_titulo)
+              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE BIBLIOTECA.titulo = :titulo", valor_titulo)
               registro_titulo_imprimir = bi_cursor.fetchall()
 
               if registro_titulo_imprimir:
-                for Id_libro, titulo, nomAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_titulo_imprimir:
-                  print(f'{titulo}\t{nomAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+                print('Titulo\t\tAutor\t\t\tGenero\tAño Publicado\tISBN\tFecha Adquirido')
+                print(separador)
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_titulo_imprimir:
+                  print(f'{titulo}\t{nomAutor} {apAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
               else:
                 print('NO se encontró ningún libro con ese título')
 
@@ -210,12 +212,14 @@ while True:
               with sqlite3.connect("biblioteca.db") as conn:
                 bi_cursor = conn.cursor()
                 valores_isbn = {"ISBN": isbn_buscar}
-                bi_cursor.execute("SELECT * FROM BIBLIOTECA WHERE ISBN = :ISBN", valores_isbn)
+                bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE BIBLIOTECA.ISBN = :ISBN", valores_isbn)
                 registro_isbn = bi_cursor.fetchall()
 
               if registro_isbn:
-                for Id_libro, titulo, nomAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_isbn:
-                  print(f'{titulo}\t{nomAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+                print('Titulo\t\tAutor\t\t\tGenero\tAño Publicado\tISBN\tFecha Adquirido')
+                print(separador)
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_isbn:
+                  print(f'{titulo}\t{nomAutor} {apAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
               else:
                 print('ERROR: No se encontraron datos, asegurese de haber ingresado correctamente el ISBN')
 
@@ -234,13 +238,20 @@ while True:
             op_reporte = int(input())
             if op_reporte == 1:
               # Catálogo completo
-              datos_grabar = dict()
+              #datos_grabar = dict()
               print("DATOS GUARDADOS:")
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
               print(separador)
-              #for i in datos: 
-                #print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-              #print(separador)
+
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                #bi_cursor.execute("SELECT BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA LEFT JOIN GENERO ON BIBLIOTECA.Id_gen = GENERO.Id_gen LEFT JOIN AUTOR on BIBLIOTECA.Id_autor = AUTOR.Id_autor")
+                bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR")
+                registro_catCompleto = bi_cursor.fetchall()
+              if registro_catCompleto:
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_catCompleto:
+                  print(f'{titulo}\t\t\t{nomAutor} {apAutor}\t\t{nomGen}\t{año_publicado}\t{ISBN}\t\t{fecha_adquirido}')
+             
 
               # Exportación a formatos CSV o MsExcel
               print("Desea exportar los datos a algun formato de los siguientes?")
@@ -251,13 +262,15 @@ while True:
 
               # exportacion a CSV o MsExcel
               if op_exportar == 1:
-                for j in datos:
-                  datos_grabar = datos
+                
+                #for j in datos:
+                  #datos_grabar = datos
                 archivo = open('logs_catalogo_completo.csv', 'w', newline='')
                 grabador = csv.writer(archivo)
-                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                grabador.writerow(('identificador', 'titulo', 'autor', 'apellidos', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
                 print("Se exporto correctamente!")
-                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                #grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                grabador.writerows(registro_catCompleto)
                 archivo.close()
                 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
                 break
@@ -270,21 +283,25 @@ while True:
                 hoja["A1"].value = "Identificador"
                 hoja["B1"].value = "Titulo"
                 hoja["C1"].value = "Autor"
-                hoja["D1"].value = "Genero"
-                hoja["E1"].value = "Año de publicacion"
-                hoja["F1"].value = "ISBN"
-                hoja["G1"].value = "Fecha adquisicion"
+                hoja["D1"].value = "Apellidos"
+                hoja["E1"].value = "Genero"
+                hoja["F1"].value = "Año de publicacion"
+                hoja["G1"].value = "ISBN"
+                hoja["H1"].value = "Fecha adquisicion"
 
-                fila = 2
-                for identificador, dato in datos.items():
-                  hoja.cell(row=fila, column=1).value = identificador
-                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                  fila += 1
+                #fila = 2
+
+                for i in registro_catCompleto:
+                  hoja.append(i)
+                #for identificador, dato in datos.items():
+                  #hoja.cell(row=fila, column=1).value = identificador
+                  #hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  #hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  #hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  #hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  #hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  #hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  #fila += 1
 
                 libro.save("reporte_completo.xlsx")
                 print("Se exporto de manera correcta")
@@ -292,19 +309,40 @@ while True:
 
             elif op_reporte == 2:
               # Filtro por autor
-              datos_grabar = dict()
-              print('Seleccione entre los siguientes autores:')
-              for j in datos:
+              #datos_grabar = dict()
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                bi_cursor.execute("SELECT * FROM AUTOR")
+                registro_autor = bi_cursor.fetchall()
+              if registro_autor:
+                print('\nSeleccione la ID de entre los siguientes autores: ')
+                print('ID\t\tAutor')
+                print(separador)
+                for Id_autor, nomAutor, apAutor in registro_autor:
+                  print(f'{Id_autor}\t{nomAutor} {apAutor}')
+              #print('Seleccione entre los siguientes autores:')
+              #for j in datos:
                 #print('Seleccione entre las siguientes opciones:')
-                print(datos[j][1])
-              filtro_autor = input("Dame el autor: \n").upper()
+                #print(datos[j][1])
+              filtro_autor = input("Dame el ID del autor: \n").upper()
 
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-              for i in datos:
-                if filtro_autor == datos[i][1]:
-                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                  print('\n')
+              valor_autor = {"Id_autor":filtro_autor}
+              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE AUTOR.Id_autor = :Id_autor", valor_autor)
+              registro_autor_imprimir = bi_cursor.fetchall()
+
+              if registro_autor_imprimir:
+                print('Titulo\t\tAutor\t\t\tGenero\tAño Publicado\tISBN\tFecha Adquirido')
+                print(separador)
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_autor_imprimir:
+                  print(f'{titulo}\t{nomAutor} {apAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+              else:
+                print('NO se encontró ningún libro con ese Autor')
+              #for i in datos:
+                #if filtro_autor == datos[i][1]:
+                  #print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  #datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  #print('\n')
               
               # AQUI
                             # exportacion a formato CSV o a MsExcel
@@ -321,9 +359,10 @@ while True:
                   #datos_grabar = datos
                 archivo = open('logs_autor_' + filtro_autor.lower() + '.csv', 'w', newline='')
                 grabador = csv.writer(archivo)
-                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                grabador.writerow(('identificador', 'titulo', 'autor', 'apellidos', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
                 print("Se exporto correctamente!")
-                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                #grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                grabador.writerows(registro_autor_imprimir)
                 archivo.close()
                 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
                 break
@@ -336,42 +375,66 @@ while True:
                 hoja["A1"].value = "Identificador"
                 hoja["B1"].value = "Titulo"
                 hoja["C1"].value = "Autor"
-                hoja["D1"].value = "Genero"
-                hoja["E1"].value = "Año de publicacion"
-                hoja["F1"].value = "ISBN"
-                hoja["G1"].value = "Fecha adquisicion"
+                hoja["D1"].value = "Apellidos"
+                hoja["E1"].value = "Genero"
+                hoja["F1"].value = "Año de publicacion"
+                hoja["G1"].value = "ISBN"
+                hoja["H1"].value = "Fecha adquisicion"
 
-                fila = 2
-                for identificador, dato in datos.items():
-                  hoja.cell(row=fila, column=1).value = identificador
-                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                  fila += 1
+                #fila = 2
+                for i in registro_autor_imprimir:
+                  hoja.append(i)
+                #for identificador, dato in datos.items():
+                  #hoja.cell(row=fila, column=1).value = identificador
+                  #hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  #hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  #hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  #hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  #hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  #hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  #fila += 1
 
-                libro.save("reporte_autor_" + filtro_autor.lower() + ".xlsx")
+                libro.save("reporte_autor.xlsx")
                 print("Se exporto de manera correcta")
                 break
               # AQUI
 
             elif op_reporte == 3:
               # Filtro por género
-              datos_grabar = dict()
-              print('Seleccione entre los siguientes Géneros:')
-              for j in datos:
+              #datos_grabar = dict()
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                bi_cursor.execute("SELECT * FROM GENERO")
+                registro_genero = bi_cursor.fetchall()
+              if registro_genero:
+                print('\nSeleccione la ID de entre los siguientes generos: ')
+                print('ID\t\tGenero')
+                print(separador)
+                for Id_gen, nomGen in registro_genero:
+                  print(f'{Id_gen}\t{nomGen}')
+              #print('Seleccione entre los siguientes Géneros:')
+              #for j in datos:
                 #print('Seleccione entre las siguientes opciones:')
-                print(datos[j][2])
+                #print(datos[j][2])
               
               filtro_genero = input("Dame el genero: \n").upper()
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-              for i in datos:
-                if filtro_genero == datos[i][2]:
-                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                  print('\n')
+              valor_genero = {"Id_gen":filtro_genero}
+              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE GENERO.Id_gen = :Id_gen", valor_genero)
+              registro_genero_imprimir = bi_cursor.fetchall()
+
+              if registro_genero_imprimir:
+                print('Titulo\t\tAutor\t\t\tGenero\tAño Publicado\tISBN\tFecha Adquirido')
+                print(separador)
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_genero_imprimir:
+                  print(f'{titulo}\t{nomAutor} {apAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+              else:
+                print('NO se encontró ningún libro con ese Género')
+              #for i in datos:
+                #if filtro_genero == datos[i][2]:
+                  #print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  #datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  #print('\n')
 
               # Exportación a formatos CSV o MsExcel
               print("Desea exportar los datos a algun formato de los siguientes?")
@@ -387,9 +450,10 @@ while True:
                   #datos_grabar = datos
                 archivo = open('logs_genero_' + filtro_genero.lower() + '.csv', 'w', newline='')
                 grabador = csv.writer(archivo)
-                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                grabador.writerow(('identificador', 'titulo', 'autor', 'apellidos', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
                 print("Se exporto correctamente!")
-                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                #grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                grabador.writerows(registro_genero_imprimir)
                 archivo.close()
                 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
                 break
@@ -402,40 +466,63 @@ while True:
                 hoja["A1"].value = "Identificador"
                 hoja["B1"].value = "Titulo"
                 hoja["C1"].value = "Autor"
-                hoja["D1"].value = "Genero"
-                hoja["E1"].value = "Año de publicacion"
-                hoja["F1"].value = "ISBN"
-                hoja["G1"].value = "Fecha adquisicion"
+                hoja["D1"].value = "Apellidos"
+                hoja["E1"].value = "Genero"
+                hoja["F1"].value = "Año de publicacion"
+                hoja["G1"].value = "ISBN"
+                hoja["H1"].value = "Fecha adquisicion"
 
-                fila = 2
-                for identificador, dato in datos.items():
-                  hoja.cell(row=fila, column=1).value = identificador
-                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                  fila += 1
+                #fila = 2
+                for i in registro_genero_imprimir:
+                  hoja.append(i)
+                #for identificador, dato in datos.items():
+                  #hoja.cell(row=fila, column=1).value = identificador
+                  #hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  #hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  #hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  #hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  #hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  #hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  #fila += 1
 
-                libro.save("reporte_libros.xlsx")
+                libro.save("reporte_genero.xlsx")
                 print("Se exporto de manera correcta")
                 break
 
             elif op_reporte == 4:
               # Filtrado por año
-              datos_grabar = dict()
-              print('Seleccione entre los siguientes Años de Publicacion:')
-              for j in datos:
-                print(datos[j][3])
+              #datos_grabar = dict()
+              with sqlite3.connect("biblioteca.db") as conn:
+                bi_cursor = conn.cursor()
+                bi_cursor.execute("SELECT año_publicado FROM BIBLIOTECA")
+                registro_año = bi_cursor.fetchall()
+              if registro_año:
+                print('\nSeleccione entre los siguientes Años de Publicación: ')
+                print(separador)
+                for año_publicado in registro_año:
+                  print(f'{año_publicado}')
+              #print('Seleccione entre los siguientes Años de Publicacion:')
+              #for j in datos:
+                #print(datos[j][3])
 
               filtro_año = input("Dame el año de publicacion: \n").upper()
               print('TITULO', ' '*29, 'AUTOR', ' '*18, 'GÉNERO', ' '*8, 'AÑO', ' '*5, 'ISBN', ' '*8, 'ADQUIRIDO   ')
-              for i in datos:
-                if filtro_año == datos[i][3]:
-                  print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
-                  datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
-                  print('\n')
+              valor_año = {"año_publicado":filtro_año}
+              bi_cursor.execute("SELECT BIBLIOTECA.Id_libro, BIBLIOTECA.titulo, AUTOR.nomAutor, AUTOR.apAutor, GENERO.nomGen, BIBLIOTECA.año_publicado, BIBLIOTECA.ISBN, BIBLIOTECA.fecha_adquirido FROM BIBLIOTECA INNER JOIN GENERO ON GENERO.Id_gen = BIBLIOTECA.GENERO INNER JOIN AUTOR ON AUTOR.Id_autor = BIBLIOTECA.AUTOR WHERE GENERO.Id_gen = :Id_gen", valor_genero)
+              registro_año_imprimir = bi_cursor.fetchall()
+
+              if registro_año_imprimir:
+                print('Titulo\t\tAutor\t\t\tGenero\tAño Publicado\tISBN\tFecha Adquirido')
+                print(separador)
+                for Id_libro, titulo, nomAutor, apAutor, nomGen, año_publicado, ISBN, fecha_adquirido in registro_año_imprimir:
+                  print(f'{titulo}\t{nomAutor} {apAutor}\t{nomGen}\t{año_publicado}\t{ISBN}\t{fecha_adquirido}')
+              else:
+                print('NO se encontró ningún libro en ese Año de Publicación')
+              #for i in datos:
+                #if filtro_año == datos[i][3]:
+                  #print(f'{datos[i][0]:35} {datos[i][1]:25} {datos[i][2]:15} {datos[i][3]:8} {datos[i][4]:15} {datos[i][5]:12}')
+                  #datos_grabar[i] = datos[i][0], datos[i][1], datos[i][2], datos[i][3], datos[i][4], datos[i][5]
+                  #print('\n')
 
               # Exportación a formatos CSV o MsExcel
               print("Desea exportar los datos a algun formato de los siguientes?")
@@ -451,9 +538,10 @@ while True:
                   #datos_grabar = datos
                 archivo = open('logs_fecha_publicado_' + filtro_año + '.csv', 'w', newline='')
                 grabador = csv.writer(archivo)
-                grabador.writerow(('identificador', 'titulo', 'autor', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
+                grabador.writerow(('identificador', 'titulo', 'autor', 'apellidos', 'genero', 'año_publicacion', 'ISBN', 'fecha_adquisicion'))
                 print("Se exporto correctamente!")
-                grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                #grabador.writerows([(identificador, datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]) for identificador, datos in datos_grabar.items()])
+                grabador.writerows(registro_año_imprimir)
                 archivo.close()
                 #'identificador, titulo, autor, genero, año_publicacion, ISBN, fecha_adquisicion'
                 break
@@ -466,23 +554,26 @@ while True:
                 hoja["A1"].value = "Identificador"
                 hoja["B1"].value = "Titulo"
                 hoja["C1"].value = "Autor"
-                hoja["D1"].value = "Genero"
-                hoja["E1"].value = "Año de publicacion"
-                hoja["F1"].value = "ISBN"
-                hoja["G1"].value = "Fecha adquisicion"
+                hoja["D1"].value = "Apellidos"
+                hoja["E1"].value = "Genero"
+                hoja["F1"].value = "Año de publicacion"
+                hoja["G1"].value = "ISBN"
+                hoja["H1"].value = "Fecha adquisicion"
 
-                fila = 2
-                for identificador, dato in datos.items():
-                  hoja.cell(row=fila, column=1).value = identificador
-                  hoja.cell(row=fila, column=2).value = datos[identificador][0]
-                  hoja.cell(row=fila, column=3).value = datos[identificador][1]
-                  hoja.cell(row=fila, column=4).value = datos[identificador][2]
-                  hoja.cell(row=fila, column=5).value = datos[identificador][3]
-                  hoja.cell(row=fila, column=6).value = datos[identificador][4]
-                  hoja.cell(row=fila, column=7).value = datos[identificador][5]
-                  fila += 1
+                #fila = 2
+                for i in registro_año_imprimir:
+                  hoja.append(i)
+                #for identificador, dato in datos.items():
+                  #hoja.cell(row=fila, column=1).value = identificador
+                  #hoja.cell(row=fila, column=2).value = datos[identificador][0]
+                  #hoja.cell(row=fila, column=3).value = datos[identificador][1]
+                  #hoja.cell(row=fila, column=4).value = datos[identificador][2]
+                  #hoja.cell(row=fila, column=5).value = datos[identificador][3]
+                  #hoja.cell(row=fila, column=6).value = datos[identificador][4]
+                  #hoja.cell(row=fila, column=7).value = datos[identificador][5]
+                  #fila += 1
 
-                libro.save("reporte_libros.xlsx")
+                libro.save("reporte_año.xlsx")
                 print("Se exporto de manera correcta")
                 break
               # AQUI
@@ -497,6 +588,62 @@ while True:
       print('\tERROR: No hay datos que mostrar, favor de registrar un nuevo ejemplar, autor o género previamente')
       print('\nRegresando al menú principal . . .')
       esperar = input('Presione enter para continuar')
+
+  elif op_main == 3:
+    # Opción filtrada para: Registrar un Autor
+    with sqlite3.connect("biblioteca.db") as conn:
+      bi_cursor = conn.cursor()
+      bi_cursor.execute("SELECT * FROM AUTOR ")
+      bd_autor = bi_cursor.fetchall()
+
+      if bd_autor:
+        print("Se han encontrado los siguientes autores registrados:")
+        print(separador)
+        print("ID\tApellido\tNombre")
+        print(separador)
+        for Id_autor, apAutor, nomAutor in bd_autor:
+          print(f"{Id_autor:^6}\t{apAutor}\t{nomAutor}")
+
+        print(separador)
+        print("De los autores anteriormente presentados, desea agregar uno mas?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_autor = int(input())
+        if opcion_agregar_autor == 1:
+          print("Ingrese los siguientes datos:")
+          apellido_autor =  input("Apellido:")
+          nombre_autor = input("Nombre: ")
+
+          valores = (apellido_autor, nombre_autor)
+
+          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
+          tabla_autores = bi_cursor.fetchall()
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
+
+      else:
+        print("No se han encontrado autores registrados, desea agregar uno?:")
+        print("[1]- SI")
+        print("[2]- NO")
+        opcion_agregar_autor = int(input())
+
+        if opcion_agregar_autor == 1:
+          print(separador)
+          print("ingresa los siguientes datos::")
+          apellido_autor =  input("Apellido:")
+          nombre_autor = input("Nombre: ")
+
+          valores = (apellido_autor, nombre_autor)
+
+          bi_cursor.execute("INSERT INTO AUTOR (apAutor, nomAutor) VALUES(?,?)", valores)
+          tabla_autores = bi_cursor.fetchall()
+
+          print("Se cargo correctamente!")
+          print(f"clave asignada: {bi_cursor.lastrowid}")
+        else:
+          print("Regresando al menu principal...")
 
   elif op_main == 3:
     # Opción filtrada para: Registrar un Autor
